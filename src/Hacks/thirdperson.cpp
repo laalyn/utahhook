@@ -4,6 +4,8 @@
 #include "../settings.h"
 #include "../interfaces.h"
 
+static int frameSkip = 0;
+
 void ThirdPerson::OverrideView(CViewSetup *pSetup)
 {
 	C_BasePlayer* localplayer = (C_BasePlayer*) entityList->GetClientEntity(engine->GetLocalPlayer());
@@ -26,6 +28,14 @@ void ThirdPerson::OverrideView(CViewSetup *pSetup)
 		trace_t tr;
 		Ray_t traceRay;
 		Vector eyePos = localplayer->GetEyePosition();
+
+		/* toggle on and off the third person dor pressing the toggleThirdPerson key which is by default KEY_LALT*/
+		if (inputSystem->IsButtonDown(Settings::ThirdPerson::toggleThirdPerson) && frameSkip == 0) {
+		
+			Settings::ThirdPerson::inTherdPersonView =  !Settings::ThirdPerson::inTherdPersonView;
+			frameSkip = 100;
+
+		}else if(frameSkip > 0){ frameSkip -= 1; }
 
 		Vector camOff = Vector(cos(DEG2RAD(viewAngles.y)) * Settings::ThirdPerson::distance,
 							   sin(DEG2RAD(viewAngles.y)) * Settings::ThirdPerson::distance,
