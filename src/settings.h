@@ -175,8 +175,7 @@ enum class AntiAimType_X : int
 
 struct AimbotWeapon_t
 {
-	bool enabled,
-		 silent,
+	bool silent,
 		 friendly,
 		 closestBone,
 	     engageLock,
@@ -186,12 +185,13 @@ struct AimbotWeapon_t
 		 smoothSaltEnabled,
 		 errorMarginEnabled,
 		 autoAimEnabled,
+		 shootassist,
 		 aimStepEnabled,
 		 rcsEnabled,
 		 rcsAlwaysOn,
-		 spreadLimitEnabled,
+		 hitchanceEnaled,
 		 autoPistolEnabled,
-		 autoShootEnabled,
+		 //autoShootEnabled,
 		 autoScopeEnabled,
 		 noShootEnabled,
 		 ignoreJumpEnabled,
@@ -204,19 +204,21 @@ struct AimbotWeapon_t
 		 predEnabled,
 		 scopeControlEnabled;
 	int engageLockTTR = 700;
-	Bone bone = CONST_BONE_HEAD;
+	Bone bone = BONE_HEAD;
 	SmoothType smoothType = SmoothType::SLOW_END;
 	ButtonCode_t aimkey = ButtonCode_t ::MOUSE_MIDDLE;
 	float smoothAmount = 1.0f,
 		  smoothSaltMultiplier = 0.0f,
 		  errorMarginValue = 0.0f,
-		  autoAimFov = 180.0f,
+		  LegitautoAimFov = 15.0f,
 		  aimStepMin = 25.0f,
 		  aimStepMax = 35.0f,
 		  rcsAmountX = 2.0f,
 		  rcsAmountY = 2.0f,
 		  autoWallValue = 10.0f,
-		  spreadLimit = 1.0f;
+		  hitchance = 20;
+	int	shotDelay = 200,
+		minShotFire = 6;
 	bool desiredBones[31];
 
 	bool operator == (const AimbotWeapon_t& another) const
@@ -227,8 +229,7 @@ struct AimbotWeapon_t
 				return false;
 		}
 
-		return this->enabled == another.enabled &&
-			this->silent == another.silent &&
+		return this->silent == another.silent &&
 			this->friendly == another.friendly &&
 			this->closestBone == another.closestBone &&
 			this->engageLock == another.engageLock &&
@@ -245,7 +246,8 @@ struct AimbotWeapon_t
 			this->errorMarginEnabled == another.errorMarginEnabled &&
 			this->errorMarginValue == another.errorMarginValue &&
 			this->autoAimEnabled == another.autoAimEnabled &&
-			this->autoAimFov == another.autoAimFov &&
+			this->shootassist == another.shootassist &&
+			this->LegitautoAimFov == another.LegitautoAimFov &&
 			this->aimStepEnabled == another.aimStepEnabled &&
 			this->aimStepMin == another.aimStepMin &&
 			this->aimStepMax == another.aimStepMax &&
@@ -254,15 +256,17 @@ struct AimbotWeapon_t
 			this->rcsAmountX == another.rcsAmountX &&
 			this->rcsAmountY == another.rcsAmountY &&
 			this->autoPistolEnabled == another.autoPistolEnabled &&
-			this->autoShootEnabled == another.autoShootEnabled &&
+			//this->autoShootEnabled == another.autoShootEnabled &&
 			this->autoScopeEnabled == another.autoScopeEnabled &&
 			this->noShootEnabled == another.noShootEnabled &&
 			this->ignoreJumpEnabled == another.ignoreJumpEnabled &&
 			this->ignoreEnemyJumpEnabled == another.ignoreEnemyJumpEnabled &&
 			this->smokeCheck == another.smokeCheck &&
 			this->flashCheck == another.flashCheck &&
-			this->spreadLimitEnabled == another.spreadLimitEnabled &&
-			this->spreadLimit == another.spreadLimit &&
+			this->hitchanceEnaled == another.hitchanceEnaled &&
+			this->hitchance == another.hitchance &&
+			this->shotDelay == another.shotDelay &&
+			this->minShotFire == another.minShotFire &&
 			this->autoWallEnabled == another.autoWallEnabled &&
 			this->autoWallValue == another.autoWallValue &&
 			this->autoSlow == another.autoSlow &&
@@ -271,6 +275,49 @@ struct AimbotWeapon_t
 			this->scopeControlEnabled == another.scopeControlEnabled;
 	}
 } const defaultSettings{};
+
+struct RagebotWeapon_t
+{
+	bool silent,
+		 friendly,
+		 closestBone,
+		 HitChanceEnabled,
+		 autoPistolEnabled,
+		 autoShootEnabled,
+		 autoScopeEnabled,
+		 autoSlow,
+		 predEnabled,
+		 scopeControlEnabled;
+	float RagebotautoAimFov = 180.f,
+		  autoWallValue = 10.0f,
+		  visibleDamage = 50.f,
+		  HitChance = 20.f;
+	bool desiredBones[31];
+
+	bool operator == (const RagebotWeapon_t& Ragebotanother) const
+	{
+		for (int bone = BONE_PELVIS; bone <= BONE_RIGHT_SOLE; bone++)
+		{
+			if( this->desiredBones[bone] != Ragebotanother.desiredBones[bone] )
+				return false;
+		}
+
+		return this->silent == Ragebotanother.silent &&
+			this->friendly == Ragebotanother.friendly &&
+			this->closestBone == Ragebotanother.closestBone &&
+			this->RagebotautoAimFov == Ragebotanother.RagebotautoAimFov &&
+			this->autoPistolEnabled == Ragebotanother.autoPistolEnabled &&
+			this->autoShootEnabled == Ragebotanother.autoShootEnabled &&
+			this->autoScopeEnabled == Ragebotanother.autoScopeEnabled &&
+			this->HitChanceEnabled == Ragebotanother.HitChanceEnabled &&
+			this->autoWallValue == Ragebotanother.autoWallValue &&
+			this->visibleDamage == Ragebotanother.visibleDamage &&
+			this->autoSlow == Ragebotanother.autoSlow &&
+			this->predEnabled == Ragebotanother.predEnabled &&
+			this->scopeControlEnabled == Ragebotanother.scopeControlEnabled && 
+			this->HitChance == Ragebotanother.HitChance;
+	}
+} const ragedefault{};
 
 class ColorVar
 {
@@ -321,12 +368,10 @@ namespace Settings
 {
 	namespace UI
 	{
-		inline ColorVar mainColor = ImColor(25, 25, 25, 255 );
-		inline ColorVar bodyColor = ImColor( 5, 5, 5, 255 );
-		inline ColorVar fontColor = ImColor( 255, 255, 255, 255 );
-		inline ColorVar accentColor = ImColor( 39, 106, 219, 255 );
-		inline bool imGuiAliasedLines = false;
-		inline bool imGuiAliasedFill = false;
+		inline ColorVar mainColor = ImColor(32, 32, 23, 255 );
+		inline ColorVar bodyColor = ImColor( 5, 3, 12, 255 );
+		inline ColorVar fontColor = ImColor( 192, 218, 217, 255 );
+		inline ColorVar accentColor = ImColor( 82, 255, 24, 106 );
 
         /* Window Position/Size Defaults */
         namespace Windows
@@ -351,7 +396,7 @@ namespace Settings
 			}
 			namespace Main
 			{
-				inline int posX = 20;
+				inline int posX = 30;
 				inline int posY = 20;
 				inline int sizeX = 960;
 				inline int sizeY = 645;
@@ -395,13 +440,13 @@ namespace Settings
 			}
 		}
 	}
-    /* Default Aimbot Settings */
-	namespace Aimbot
+    /* Default LegitBot Settings */
+	namespace Legitbot
 	{
 		inline bool enabled = false;
         inline bool silent = false;
         inline bool friendly = false;
-        inline Bone bone = CONST_BONE_HEAD;
+        inline Bone bone = BONE_HEAD;
         inline ButtonCode_t aimkey = ButtonCode_t::MOUSE_MIDDLE;
         inline bool aimkeyOnly = false;
 
@@ -427,7 +472,7 @@ namespace Settings
 		namespace AutoAim
 		{
 			inline bool enabled = false;
-            inline float fov = 180.0f;
+            inline float fov = 15.f;
             inline bool realDistance = false;
             inline bool closestBone = false;
             inline bool desiredBones[] = {true, true, true, true, true, true, true, // center mass
@@ -439,6 +484,11 @@ namespace Settings
             inline bool engageLock = false;
             inline bool engageLockTR = false; // Target Reacquisition ( re-target after getting a kill when spraying ).
             inline int engageLockTTR = 700; // Time to Target Reacquisition in ms
+		}
+
+		namespace ShootAssist
+		{
+			inline bool enabled = false;
 		}
 
 		namespace AutoWall
@@ -509,10 +559,20 @@ namespace Settings
 			inline bool enabled = false;
 		}
 
-		namespace SpreadLimit
+		namespace ShotDelay
+		{
+			inline int value = 200;
+		}
+
+		namespace MinShotFire
+		{
+			inline int value = 6;
+		} // namespace MinShotDealay
+		
+		namespace Hitchance
 		{
 			inline bool enabled = false;
-			inline float value = 0.1f;
+			inline float value = 20;
 		}
 
 		namespace Prediction
@@ -529,6 +589,95 @@ namespace Settings
                 { ItemDefinitionIndex::INVALID, defaultSettings },
         };
 	}
+
+	namespace Ragebot
+	{
+		inline float visibleDamage = 50.f;
+		inline bool enabled = false;
+        inline bool silent = false;
+        inline bool friendly = false;
+
+		namespace AutoAim
+		{
+			inline bool enabled = false;
+            inline float fov = 180.0f;
+            inline bool desiredBones[] = {true, true, true, true, true, true, true, // center mass
+                                          true, true, true, true, true, true, true, // left arm
+                                          true, true, true, true, true, true, true, // right arm
+                                          true, true, true, true, true, // left leg
+                                          true, true, true, true, true  // right leg
+            };
+		}
+
+		namespace AutoWall
+		{
+			inline float value = 15.0f;
+		}
+
+		namespace AutoPistol
+		{
+			inline bool enabled = false;
+		}
+
+		namespace AutoShoot
+		{
+			inline bool enabled = false;
+			inline bool velocityCheck = false;
+			inline bool autoscope = false;
+		}
+
+		namespace AutoCrouch
+		{
+			inline bool enabled = false;
+		}
+
+		namespace AutoSlow
+		{
+			inline bool enabled = false;
+		}
+
+		namespace IgnoreJump
+		{
+			inline bool enabled = false;
+		}
+
+		namespace IgnoreEnemyJump
+		{
+			inline bool enabled = false;
+		}
+
+		namespace SmokeCheck
+		{
+			inline bool enabled = false;
+		}
+
+		namespace FlashCheck
+		{
+			inline bool enabled = false;
+		}
+
+		namespace HitChance
+		{
+			inline bool enabled = false;
+			inline float value = 20.f;
+		}
+
+		namespace Prediction
+		{
+			inline bool enabled = false;
+		}
+
+		namespace ScopeControl
+		{
+			inline bool enabled = false;
+		}
+
+		inline std::unordered_map<ItemDefinitionIndex, RagebotWeapon_t, Util::IntHash<ItemDefinitionIndex>> weapons = {
+                { ItemDefinitionIndex::INVALID, ragedefault },
+        };
+	}
+
+
 
 	namespace Triggerbot
 	{
@@ -566,12 +715,15 @@ namespace Settings
             inline bool knifeHeld = false;
         }
 
-        namespace Yaw
+        namespace RageAntiAim
         {
-            inline bool enabled = false;
-            inline AntiAimType_Y type = AntiAimType_Y::NONE;
-            inline AntiAimType_Y typeFake = AntiAimType_Y::NONE;
+            inline bool enable = false;
         }
+
+		namespace LegitAntiAim 
+		{
+			inline bool enable = false;
+		}
 
         namespace Pitch
         {
@@ -1153,7 +1305,9 @@ namespace Settings
 	namespace ThirdPerson
 	{
 		inline bool enabled = false;
-		inline float distance = 30.0f;
+		inline bool inTherdPersonView = true;
+		inline ButtonCode_t toggleThirdPerson = ButtonCode_t::KEY_CAPSLOCK;
+		inline float distance = 100.0f;
         inline ShowedAngle type = ShowedAngle::REAL;
 	}
 

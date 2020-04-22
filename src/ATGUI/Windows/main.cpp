@@ -4,11 +4,17 @@
 #include "../../ImGUI/imgui_internal.h"
 #include "../../Utils/xorstring.h"
 
-#include "../Tabs/aimbottab.h"
+#include "../Tabs/legitbottab.h"
+#include "../Tabs/ragebottab.h"
 #include "../Tabs/hvhtab.h"
 #include "../Tabs/misctab.h"
 #include "../Tabs/triggerbottab.h"
 #include "../Tabs/visualstab.h"
+#include "../Tabs/skinstab.h"
+#include "../Tabs/modelstab.h"
+
+#include "colors.h"
+#include "configs.h"
 
 bool Main::showWindow = true;
 
@@ -34,8 +40,15 @@ void Main::RenderWindow()
 
 	static int page = 0;
 
-	if (ImGui::Begin(XORSTR("Fuzion"), &Main::showWindow, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar ))
+	
+
+	if (ImGui::Begin(XORSTR("MissedIt"), &Main::showWindow, ImGuiWindowFlags_NoCollapse | ImGuiItemFlags_AllowKeyboardFocus | ImGuiWindowFlags_NoScrollbar | ImGuiComboFlags_NoArrowButton))
 	{
+		if (ImGui::Button(XORSTR("Config"), ImVec2( (ImGui::GetWindowSize().x / 2) - 9.f, 0) ) )
+			Configs::showWindow = !Configs::showWindow;
+		ImGui::SameLine();
+		if (ImGui::Button(XORSTR("COLOR PICKER"), ImVec2( (ImGui::GetWindowSize().x /2) - 9, 0) ) )
+			Colors::showWindow = !Colors::showWindow;
 		Settings::UI::Windows::Main::open = true;
 		ImVec2 temp = ImGui::GetWindowSize();
 		Settings::UI::Windows::Main::sizeX = (int)temp.x;
@@ -44,11 +57,13 @@ void Main::RenderWindow()
 		Settings::UI::Windows::Main::posX = (int)temp.x;
 		Settings::UI::Windows::Main::posY = (int)temp.y;
 		const char* tabs[] = {
-				"Aimbot",
-				"Triggerbot",
+				"Legit Bot",
+				"Rage Bot(Beta)",
+				"Anti Aim",
 				"Visuals",
-				"HvH",
-				"Misc",
+				"Skin Changer",
+				"Model Changer",
+				"Misc",	
 		};
 
 		for (int i = 0; i < IM_ARRAYSIZE(tabs); i++)
@@ -71,23 +86,27 @@ void Main::RenderWindow()
 				ImGui::SameLine();
 		}
 
-		ImGui::Separator();
-
 		switch (page)
 		{
 			case 0:
-				Aimbot::RenderTab();
+				Legitbot::RenderTab();
 				break;
 			case 1:
-				Triggerbot::RenderTab();
+				Ragebot::RenderTab();
 				break;
 			case 2:
-				Visuals::RenderTab();
+				AntiAim::RenderTab();
 				break;
 			case 3:
-				HvH::RenderTab();
+				Visuals::RenderTab();
 				break;
 			case 4:
+				Skins::RenderTab();
+				break;
+			case 5:
+				Models::RenderTab();
+				break;
+			case 6:
 				Misc::RenderTab();
 				break;
 		}

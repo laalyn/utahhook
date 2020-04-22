@@ -520,13 +520,13 @@ static void DrawTracer( C_BasePlayer* player ) {
 	bool bIsVisible = Entity::IsVisible( player, CONST_BONE_HEAD, 180.f, Settings::ESP::Filters::smokeCheck );
 	Draw::AddLine( ( int ) ( src.x ), ( int ) ( src.y ), x, y, ESP::GetESPPlayerColor( player, bIsVisible ) );
 }
-static void DrawAimbotSpot( ) {
+static void DrawLegitbotSpot( ) {
 	C_BasePlayer* localplayer = ( C_BasePlayer* ) entityList->GetClientEntity( engine->GetLocalPlayer() );
 	if ( !localplayer || !localplayer->GetAlive() ){
 		Settings::Debug::AutoAim::target = {0,0,0};
 		return;
 	}
-	if ( !Settings::Aimbot::AutoAim::enabled || !Settings::Aimbot::enabled ){
+	if ( !Settings::Legitbot::AutoAim::enabled || !Settings::Legitbot::enabled ){
 		Settings::Debug::AutoAim::target = {0,0,0};
 		return;
 	}
@@ -588,7 +588,7 @@ static void DrawAutoWall(C_BasePlayer *player) {
 			continue;
 
 		Autowall::FireBulletData data;
-		int damage = (int)Autowall::GetDamage( bone3D, !Settings::Aimbot::friendly, data );
+		int damage = (int)Autowall::GetDamage( bone3D, !Settings::Legitbot::friendly, data );
 		char buffer[4];
 		snprintf(buffer, sizeof(buffer), "%d", damage);
 		Draw::AddText( bone2D.x, bone2D.y, buffer, ImColor( 255, 0, 255, 255 ) );
@@ -637,7 +637,7 @@ static void DrawAutoWall(C_BasePlayer *player) {
 
 	Autowall::FireBulletData data;
 	for ( int i = 0; i < 11; i++ ) {
-		int damage = (int)Autowall::GetDamage( headPoints[i], !Settings::Aimbot::friendly, data );
+		int damage = (int)Autowall::GetDamage( headPoints[i], !Settings::Legitbot::friendly, data );
 		char buffer[4];
 		snprintf(buffer, sizeof(buffer), "%d", damage);
 
@@ -933,7 +933,7 @@ static void DrawPlayer(C_BasePlayer* player)
 		DrawBoneMap( player );
 
 	if (Settings::Debug::AutoAim::drawTarget)
-		DrawAimbotSpot();
+		DrawLegitbotSpot();
 
     if (Settings::ESP::Sounds::enabled) {
 		DrawSounds( player, playerColor );
@@ -1365,11 +1365,11 @@ static void DrawFOVCrosshair()
 	if (!localplayer->GetAlive())
 		return;
 
-	if (Settings::Aimbot::AutoAim::fov > OverrideView::currentFOV)
+	if (Settings::Legitbot::AutoAim::fov > OverrideView::currentFOV)
 		return;
 
 	float radius;
-	if (Settings::Aimbot::AutoAim::realDistance)
+	if (Settings::Legitbot::AutoAim::realDistance)
 	{
 		Vector src3D, dst3D, forward;
 		trace_t tr;
@@ -1388,7 +1388,7 @@ static void DrawFOVCrosshair()
 		QAngle leftViewAngles = QAngle(angles.x, angles.y - 90.f, 0.f);
 		Math::NormalizeAngles(leftViewAngles);
 		Math::AngleVectors(leftViewAngles, forward);
-		forward *= Settings::Aimbot::AutoAim::fov * 5.f;
+		forward *= Settings::Legitbot::AutoAim::fov * 5.f;
 
 		Vector maxAimAt = tr.endpos + forward;
 
@@ -1399,7 +1399,7 @@ static void DrawFOVCrosshair()
 		radius = fabsf(Paint::engineWidth / 2 - max2D.x);
 	}
 	else
-		radius = ((Settings::Aimbot::AutoAim::fov / OverrideView::currentFOV) * Paint::engineWidth) / 2;
+		radius = ((Settings::Legitbot::AutoAim::fov / OverrideView::currentFOV) * Paint::engineWidth) / 2;
 
 	radius = std::min(radius, (((180.f / OverrideView::currentFOV) * Paint::engineWidth) / 2)); // prevents a big radius (CTD).
 
@@ -1433,7 +1433,7 @@ static void DrawSpread()
         }
     }
     if ( Settings::ESP::Spread::spreadLimit ) {
-        float cone = Settings::Aimbot::SpreadLimit::value;
+        float cone = Settings::Legitbot::Hitchance::value / 10;
         if ( cone > 0.0f ) {
             float radius = ( cone * Paint::engineHeight ) / 1.5f;
             Draw::AddRect( ( ( Paint::engineWidth / 2 ) - radius ), ( Paint::engineHeight / 2 ) - radius + 1,

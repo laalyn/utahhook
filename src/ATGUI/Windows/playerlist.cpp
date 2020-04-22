@@ -5,7 +5,7 @@
 #include "../../settings.h"
 #include "../../Utils/xorstring.h"
 
-#include "../../Hacks/aimbot.h"
+#include "../../Hacks/legitbot.h"
 #include "../../Hacks/esp.h"
 #include "../../Hacks/resolver.h"
 #include "../../Hacks/clantagchanger.h"
@@ -19,15 +19,12 @@ static char nickname[127] = "";
 
 void PlayerList::RenderWindow()
 {
-	static int currentPlayer = -1;
-	
 	if( Settings::UI::Windows::Playerlist::reload )
 	{
 		ImGui::SetNextWindowPos(ImVec2(Settings::UI::Windows::Playerlist::posX, Settings::UI::Windows::Playerlist::posY), ImGuiSetCond_Always);
 		ImGui::SetNextWindowSize(ImVec2(Settings::UI::Windows::Playerlist::sizeX, Settings::UI::Windows::Playerlist::sizeY), ImGuiSetCond_Always);
 		Settings::UI::Windows::Playerlist::reload = false;
 		PlayerList::showWindow = Settings::UI::Windows::Playerlist::open;
-		currentPlayer = -1;
 	}
 	else
 	{
@@ -49,6 +46,8 @@ void PlayerList::RenderWindow()
 		temp = ImGui::GetWindowPos();
 		Settings::UI::Windows::Playerlist::posX = (int)temp.x;
 		Settings::UI::Windows::Playerlist::posY = (int)temp.y;
+
+		static int currentPlayer = -1;
 
 		if (!engine->IsInGame() || (*csPlayerResource && !(*csPlayerResource)->GetConnected(currentPlayer)))
 			currentPlayer = -1;
@@ -169,13 +168,13 @@ void PlayerList::RenderWindow()
 
 			ImGui::Columns(3);
 			{
-				bool isFriendly = std::find(Aimbot::friends.begin(), Aimbot::friends.end(), entityInformation.xuid) != Aimbot::friends.end();
+				bool isFriendly = std::find(Legitbot::friends.begin(), Legitbot::friends.end(), entityInformation.xuid) != Legitbot::friends.end();
 				if (ImGui::Checkbox(XORSTR("Friend"), &isFriendly))
 				{
 					if (isFriendly)
-						Aimbot::friends.push_back(entityInformation.xuid);
+						Legitbot::friends.push_back(entityInformation.xuid);
 					else
-						Aimbot::friends.erase(std::find(Aimbot::friends.begin(), Aimbot::friends.end(), entityInformation.xuid));
+						Legitbot::friends.erase(std::find(Legitbot::friends.begin(), Legitbot::friends.end(), entityInformation.xuid));
 				}
 
 				bool shouldResolve = std::find(Resolver::Players.begin(), Resolver::Players.end(), entityInformation.xuid) != Resolver::Players.end();
