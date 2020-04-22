@@ -152,7 +152,7 @@ static void SwapWindow(SDL_Window* window)
         ImGui::Begin( "", (bool*)true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs  );
             UI::SetupColors();
             UI::SetupWindows();
-            // UI::DrawImWatermark();
+            UI::DrawImWatermark();
             Hooks::PaintImGui(); // Process ImGui Draw Commands
         ImGui::End();
 	ImGui::EndFrame();
