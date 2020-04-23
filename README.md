@@ -143,8 +143,8 @@ To add a config, copy the folder containing it to `~/.config/MissedIT/CSGO`
 
 ## Screenshots
 
-![aimbot](Pictures/Screenshot1.png)
-![menu](Pictures/Screenshot2.png)
+![LegitBot](Pictures/Screenshot1.png)
+![RageBot](Pictures/Screenshot2.png)
 ![esp](Pictures/Screenshot3.png)
 
 
