@@ -10,7 +10,7 @@ Want to chat or play with other MissedIT users? Join us on Discord :- <a href = 
 
 ## What is MissedIT?
 
-A fully featured internal hack for *CounterStrike : Global Offensive* written in C++. Which is a Fork if Aimtux-MissedIT
+A fully featured internal hack for *CounterStrike : Global Offensive* written in C++. Which is a Fork of Aimtux-Fuzion
 
 ## AUR Installation
 
