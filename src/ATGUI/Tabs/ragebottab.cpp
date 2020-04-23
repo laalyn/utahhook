@@ -25,6 +25,8 @@ static bool autoPistolEnabled = false;
 static bool autoShootEnabled = false;
 static bool autoScopeEnabled = false;
 static bool HitChanceEnabled = false;
+static bool HitChanceOverwrrideEnable = false;
+static float HitchanceOverwriteValue = 1.6f;
 static float HitChange = 20.f;
 static float autoWallValue = 10.f;
 static float visibleDamage = 50.f;
@@ -47,6 +49,8 @@ void UI::ReloadRageWeaponSettings()
 	autoScopeEnabled = Settings::Ragebot::weapons.at(index).autoScopeEnabled;
 	HitChanceEnabled = Settings::Ragebot::weapons.at(index).HitChanceEnabled;
 	HitChange = Settings::Ragebot::weapons.at(index).HitChance;
+	HitChanceOverwrrideEnable = Settings::Ragebot::weapons.at(index).HitChanceOverwrriteEnable;
+	HitchanceOverwriteValue = Settings::Ragebot::weapons.at(index).HitchanceOverwrriteValue;
 	autoWallValue = Settings::Ragebot::weapons.at(index).autoWallValue;
 	visibleDamage = Settings::Ragebot::weapons.at(index).visibleDamage;
 	autoSlow = Settings::Ragebot::weapons.at(index).autoSlow;
@@ -76,10 +80,12 @@ void UI::UpdateRageWeaponSettings()
 			.autoSlow = autoSlow,
 			.predEnabled = predEnabled,
 			.scopeControlEnabled = scopeControlEnabled,
+			.HitChanceOverwrriteEnable = HitChanceOverwrrideEnable,
 			.RagebotautoAimFov = RagebotautoAimValue,
 			.autoWallValue = autoWallValue,
 			.visibleDamage = visibleDamage,
 			.HitChance = HitChange,	
+			.HitchanceOverwrriteValue = HitchanceOverwriteValue,
 	};
 
 
@@ -270,6 +276,11 @@ void Ragebot::RenderTab()
 			if( ImGui::Checkbox(XORSTR("Hit Chance"), &HitChanceEnabled) )
 				UI::UpdateRageWeaponSettings();
 			if( ImGui::SliderFloat(XORSTR("##HITCHANCE"), &HitChange, 1.f, 100.f) )
+				UI::UpdateRageWeaponSettings();
+
+			if( ImGui::Checkbox(XORSTR("HitChance OverWrite"), &HitChanceOverwrrideEnable) )
+				UI::UpdateRageWeaponSettings();
+			if( ImGui::SliderFloat(XORSTR("##HCOVERWRITE"), &HitchanceOverwriteValue, 0.1f, 5.f) )
 				UI::UpdateRageWeaponSettings();
 			ImGui::EndChild();
 		}

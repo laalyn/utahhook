@@ -32,10 +32,10 @@ void ThirdPerson::OverrideView(CViewSetup *pSetup)
 		/* toggle on and off the third person dor pressing the toggleThirdPerson key which is by default KEY_LALT*/
 		if (inputSystem->IsButtonDown(Settings::ThirdPerson::toggleThirdPerson) && frameSkip == 0) {
 		
-			Settings::ThirdPerson::inTherdPersonView =  !Settings::ThirdPerson::inTherdPersonView;
+			Settings::ThirdPerson::enabled =  !Settings::ThirdPerson::enabled;
 			frameSkip = 100;
 
-		}else if(frameSkip > 0){ frameSkip -= 1; }
+		}else if(frameSkip > 0){ frameSkip--; }
 
 		Vector camOff = Vector(cos(DEG2RAD(viewAngles.y)) * Settings::ThirdPerson::distance,
 							   sin(DEG2RAD(viewAngles.y)) * Settings::ThirdPerson::distance,
