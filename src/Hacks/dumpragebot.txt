@@ -688,7 +688,7 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 	if (!localplayer || !localplayer->GetAlive())
 		return;
 
-	Ragebot::UpdateValues();
+	//Ragebot::UpdateValues();
 
 	QAngle oldAngle;
 	engine->GetViewAngles(oldAngle);

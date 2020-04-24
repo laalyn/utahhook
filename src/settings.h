@@ -292,7 +292,7 @@ struct RagebotWeapon_t
 		  autoWallValue = 10.0f,
 		  visibleDamage = 50.f,
 		  HitChance = 20.f,
-		  HitchanceOverwrriteValue = 1.6f;
+		  HitchanceOverwrriteValue = 1.f;
 	bool desiredBones[31];
 
 	bool operator == (const RagebotWeapon_t& Ragebotanother) const
@@ -669,7 +669,7 @@ namespace Settings
 		namespace HitChanceOverwrride 
 		{
 			inline bool enable = false;
-			inline float value = 1.6;
+			inline float value = 1.0f;
 		}
 
 		namespace Prediction
@@ -1315,6 +1315,7 @@ namespace Settings
 	namespace ThirdPerson
 	{
 		inline bool enabled = false;
+		inline bool toggled = true;
 		inline ButtonCode_t toggleThirdPerson = ButtonCode_t::KEY_CAPSLOCK;
 		inline float distance = 100.0f;
         inline ShowedAngle type = ShowedAngle::REAL;

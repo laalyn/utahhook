@@ -628,6 +628,7 @@ void Settings::LoadDefaultsOrSave(std::string path)
     LoadColor(settings[XORSTR("Eventlog")][XORSTR("color")], Settings::Eventlog::color);
 
     settings[XORSTR("ThirdPerson")][XORSTR("enabled")] = Settings::ThirdPerson::enabled;
+    settings[XORSTR("ThirdPerson")][XORSTR("toggled")] = Settings::ThirdPerson::toggled;
     settings[XORSTR("ThirdPerson")][XORSTR("distance")] = Settings::ThirdPerson::distance;
     settings[XORSTR("ThirdPerson")][XORSTR("togglekey")] = Util::GetButtonName(Settings::ThirdPerson::toggleThirdPerson);
     settings[XORSTR("ThirdPerson")][XORSTR("type")] = (int)Settings::ThirdPerson::type;
@@ -1252,6 +1253,7 @@ void Settings::LoadConfig(std::string path)
     GetVal(settings[XORSTR("Eventlog")][XORSTR("color")], &Settings::Eventlog::color);
 
     GetVal(settings[XORSTR("ThirdPerson")][XORSTR("enabled")], &Settings::ThirdPerson::enabled);
+    GetVal(settings[XORSTR("ThirdPerson")][XORSTR("toggled")], &Settings::ThirdPerson::toggled);
     GetVal(settings[XORSTR("ThirdPerson")][XORSTR("distance")], &Settings::ThirdPerson::distance);
     GetButtonCode(settings[XORSTR("ThirdPerson")][XORSTR("togglekey")], &Settings::ThirdPerson::toggleThirdPerson);
     GetVal(settings[XORSTR("ThirdPerson")][XORSTR("type")], (int*)&Settings::ThirdPerson::type);

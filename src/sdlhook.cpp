@@ -149,7 +149,7 @@ static void SwapWindow(SDL_Window* window)
         ImGui::SetNextWindowPos( ImVec2( 0, 0 ), ImGuiCond_Always );
         ImGui::SetNextWindowSize( ImVec2( w, h ), ImGuiCond_Always );
         ImGui::SetNextWindowBgAlpha( 0.0f );
-        ImGui::Begin( "", (bool*)true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs  );
+        ImGui::Begin( "", (bool*)true, /*ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove |*/ ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs /*| ImGuiComboFlags_NoArrowButton*/ | ImGuiColumnsFlags_NoBorder);
             UI::SetupColors();
             UI::SetupWindows();
             UI::DrawImWatermark();

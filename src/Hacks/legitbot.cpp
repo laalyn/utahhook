@@ -787,6 +787,7 @@ void Legitbot::CreateMove(CUserCmd* cmd)
 							if(delay >= (Settings::Legitbot::ShotDelay::value / 10.f) && _delayed == false)
 							{
 								_delayed = true;
+								shouldAim = false;
 							}
 							if (_delayed)
 							{
@@ -806,6 +807,7 @@ void Legitbot::CreateMove(CUserCmd* cmd)
 						if(delay >= (Settings::Legitbot::ShotDelay::value / 10.f) && _delayed == false)
 							{
 								_delayed = true;
+								shouldAim = false;
 							}
 							if (_delayed)
 							{

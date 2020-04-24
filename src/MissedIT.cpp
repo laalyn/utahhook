@@ -1,5 +1,5 @@
 #include <thread>
-
+#include <future>
 #include "hooker.h"
 #include "interfaces.h"
 #include "Utils/util.h"
@@ -143,6 +143,7 @@ void MainThread()
 /* Entrypoint to the Library. Called when loading */
 int __attribute__((constructor)) Startup()
 {
+    //std::async(std::launch::async, MainThread);
 	std::thread mainThread(MainThread);
 	// The root of all suffering is attachment
 	// Therefore our little buddy must detach from this realm.
