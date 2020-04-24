@@ -3,6 +3,10 @@
 </p>
 ===================
 
+# This Is Stable Chanel For MissedIT
+* This repo Is Basically Going to Get Frequent Updates Thogh It can contain some bugs
+* To get Stable Updates and Bug Fixes and Improvements then Go to </a href = https://github.com/HackerPolice/MissedIT-Stable >MissedIT-Stable</a>. 
+
 # It looks like we are starting to get detected. Use public forks at your own Risk! 
 
 Want to chat or play with other MissedIT users? Join us on Discord :- <a href = https://discord.gg/PDtg8hd> Hacker.Police Discord</a>
