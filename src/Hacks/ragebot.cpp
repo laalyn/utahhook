@@ -115,21 +115,18 @@ static void GetBestSpotAndDamage(C_BasePlayer *player, Vector &wallBangSpot,floa
 					prevSpotDamage = 0;
 					return;
 				}
-				if (VisiblityCheck)
+				if (VisiblityCheck && spotDamage > 0.f && spotDamage >= prevSpotDamage && spotDamage > Settings::Ragebot::visibleDamage)
 				{
 					prevSpotDamage = VisibleDamage = spotDamage;
 					visibleSPot = headPoints[j];
+					return;
 				}
-				if(spotDamage <= 0.f || spotDamage < Settings::Ragebot::AutoWall::value)
+				if(spotDamage > 0.f && spotDamage > Settings::Ragebot::AutoWall::value && spotDamage >= prevSpotDamage)
 				{
-					continue;
-				}
-				else if (spotDamage >= prevSpotDamage)
-				{
-					hitedShots++;
 					prevSpotDamage = WallbangDamage = spotDamage;
 					wallBangSpot = headPoints[j];
-				}		
+					return;
+				}	
 			}
 			
 		}
@@ -158,8 +155,6 @@ static void GetBestSpotAndDamage(C_BasePlayer *player, Vector &wallBangSpot,floa
 				visibleSPot = bone3D;
 				prevSpotDamage = VisibleDamage = boneDamage;
 			}
-			else
-				continue;
 		}	
 		//this for some future updates ..
 		if (boneDamage != 0.f)
@@ -320,7 +315,7 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 		//Vector tempSpot = GetClosestSpot(cmd, localplayer, player);
 		C_BaseCombatWeapon* activeWeapon = (C_BaseCombatWeapon*) entityList->GetClientEntityFromHandle(localplayer->GetActiveWeapon());
 		float playerHelth = player->GetHealth();
-		if( (!wallBangSpot.IsZero() && WallBangdamage > 0.f) || !VisibleSpot.IsZero())
+		if( (!wallBangSpot.IsZero() && WallBangdamage > 0.f))
 		{
 
 			if(VisibleDamage >= playerHelth)
@@ -340,8 +335,11 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 				lastRayEnd = wallBangSpot;
 				return closestEntity;
 			}
-
-			if( (!VisibleSpot.IsZero() && VisibleDamage >= Settings::Ragebot::visibleDamage) || VisibleDamage > WallBangdamage)
+			else if (VisibleDamage < Settings::Ragebot::visibleDamage && WallBangdamage < Settings::Ragebot::AutoWall::value)
+			{
+				continue;
+			}
+			if( (!VisibleSpot.IsZero() && VisibleDamage >= Settings::Ragebot::visibleDamage))
 			{
 				*bestDamage = VisibleDamage;
 				*bestSpot = VisibleSpot;
@@ -359,7 +357,7 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 				
 		}
 	}
-	if( bestSpot->IsZero() )
+	if( bestSpot->IsZero()  || *bestDamage <= 0.f)
 	{
 		return nullptr;
 	}
@@ -686,7 +684,11 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 	C_BasePlayer* localplayer = (C_BasePlayer*) entityList->GetClientEntity(engine->GetLocalPlayer());
 	
 	if (!localplayer || !localplayer->GetAlive())
+	{
+		RagebotShouldAim = false;
 		return;
+	}
+		
 
 	Ragebot::UpdateValues();
 
@@ -706,10 +708,11 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 	CSWeaponType weaponType = activeWeapon->GetCSWpnData()->GetWeaponType();
 	if (weaponType == CSWeaponType::WEAPONTYPE_C4 || weaponType == CSWeaponType::WEAPONTYPE_GRENADE || weaponType == CSWeaponType::WEAPONTYPE_KNIFE)
 		return;
-
-    Vector bestSpot = {0,0,0};
-	float bestDamage = 0.0f;
+	
+	Vector bestSpot = {0,0,0};
+	float bestDamage = 0.1f;
 	C_BasePlayer* player = GetClosestPlayerAndSpot(cmd, &bestSpot, &bestDamage);
+
 	if (player)
 	{
             //Auto Scop Controll system to controll auto scoping every time
@@ -762,6 +765,7 @@ void Ragebot::CreateMove(CUserCmd* cmd)
         Settings::Debug::AutoAim::target = {0,0,0};
 		RagebotShouldAim = false;
         lastRandom = {0,0,0};
+		EnemyPresent = false;
 		RagebotAutoPistol(activeWeapon, cmd);
     }
 
