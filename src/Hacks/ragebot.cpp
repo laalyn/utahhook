@@ -99,10 +99,7 @@ static void GetBestSpotAndDamage(C_BasePlayer *player, Vector &wallBangSpot,floa
 			{
 				Autowall::FireBulletData data;
 				float spotDamage = Autowall::GetDamage(headPoints[j], !Settings::Ragebot::friendly, data);
-				//this is for future update
-				/*if (spotDamage != 0)
-					totalShots++;
-				*/
+				
 				if (spotDamage > 0.f && !EnemyPresent)
 					EnemyPresent = true;
 
@@ -155,9 +152,6 @@ static void GetBestSpotAndDamage(C_BasePlayer *player, Vector &wallBangSpot,floa
 				prevSpotDamage = VisibleDamage = boneDamage;
 			}
 		}	
-		//this for some future updates ..
-		if (boneDamage != 0.f)
-			totalShots++;
 
 		if( boneDamage >= prevSpotDamage && boneDamage >= minDamage) 
 		{
@@ -393,8 +387,8 @@ static void RagebotAutoSlow(C_BasePlayer* player, float& forward, float& sideMov
 		if ( !Ragebothitchance(localplayer, activeWeapon) )
 		{
 			cmd->buttons |= IN_WALK;
-			forward = 0;
-			sideMove = 0;
+			forward = -forward;
+			sideMove = -sideMove;
 			cmd->upmove = 0;
 			return;
 		}

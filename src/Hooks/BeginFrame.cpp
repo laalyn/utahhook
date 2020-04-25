@@ -10,14 +10,6 @@
 #include "../Hacks/radar.h"
 #include "../Hacks/disablepostprocessing.h"
 
-#include <stdio.h>
-#include <string>
-#include <iostream>
-
-using namespace std;
-
-
-
 typedef void (*BeginFrameFn) (void*, float);
 
 void Hooks::BeginFrame(void* thisptr, float frameTime)
