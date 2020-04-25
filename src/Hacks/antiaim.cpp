@@ -107,7 +107,7 @@ static void RageAntiAim(C_BasePlayer *const localplayer, QAngle& angle, bool bSe
 
     if(bSend) {
         AntiAim::fakeAngle.y = angle.y;
-        AntiAim::fakeAngle.x = 49.0f;
+        AntiAim::fakeAngle.x = 89.0f;
     }
     else
     {

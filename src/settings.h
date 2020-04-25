@@ -437,7 +437,7 @@ namespace Settings
 		{
 			namespace ESP
 			{
-				inline char* family = (char*)"Segoe UI";
+				inline char* family = (char*)"Georgia";
 				inline int size = 12;
 				inline int flags = (int)FontFlags::FONTFLAG_OUTLINE;
 			}
