@@ -1137,10 +1137,9 @@ namespace Settings
 		inline bool showOnlyWhenShooting = false;
 	}
 
-	namespace Airstuck
+	namespace RagdollGravity
 	{
 		inline bool enabled = false;
-		inline ButtonCode_t key = ButtonCode_t::KEY_F;
 	}
 
 	namespace Autoblock
