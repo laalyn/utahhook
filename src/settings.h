@@ -735,6 +735,8 @@ namespace Settings
 		namespace LegitAntiAim 
 		{
 			inline bool enable = false;
+			inline ButtonCode_t InvertKey = ButtonCode_t::KEY_T;
+			inline bool inverted = false;
 		}
 
         namespace Yaw

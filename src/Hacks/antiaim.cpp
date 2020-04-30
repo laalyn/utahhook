@@ -10,8 +10,10 @@
 
 QAngle AntiAim::realAngle;
 QAngle AntiAim::fakeAngle;
+QAngle AntiAim::LastTickViewAngle;
 
-float AntiAim::GetMaxDelta( CCSGOAnimState *animState ) {
+float AntiAim::GetMaxDelta( CCSGOAnimState *animState ) 
+{
 
     float speedFraction = std::max(0.0f, std::min(animState->feetShuffleSpeed, 1.0f));
 
@@ -69,6 +71,7 @@ static bool GetBestHeadAngle(QAngle& angle)
 
     return closest_distance < Settings::AntiAim::HeadEdge::distance;
 }
+
 static bool HasViableEnemy()
 {
     C_BasePlayer* localplayer = (C_BasePlayer*) entityList->GetClientEntity(engine->GetLocalPlayer());
@@ -99,6 +102,7 @@ static bool HasViableEnemy()
 
     return false;
 }
+
 static void DoAntiAimY(C_BasePlayer *const localplayer, QAngle& angle, bool bSend)
 {
     AntiAimType_Y aa_type = bSend ? Settings::AntiAim::Yaw::typeFake : Settings::AntiAim::Yaw::type;
@@ -179,9 +183,56 @@ static void DoAntiAimX(QAngle& angle, bool bFlip, bool& clamp)
     }
 }
 
+static void DoLegitAntiAim(C_BasePlayer *const localplayer, QAngle& angle, bool &bSend)
+{
+    if (inputSystem->IsButtonDown(Settings::AntiAim::LegitAntiAim::InvertKey))
+    {
+        Settings::AntiAim::LegitAntiAim::inverted = !Settings::AntiAim::LegitAntiAim::inverted;
+    }
+    float maxDelta = AntiAim::GetMaxDelta(localplayer->GetAnimState());
+
+    if(!Settings::AntiAim::LegitAntiAim::inverted)
+    {
+        //angle.y = bSend ? AntiAim::fakeAngle.y = CreateMove::lastTickViewAngles.y + (maxDelta / 2.f) : AntiAim::realAngle.y = CreateMove::lastTickViewAngles.y - (maxDelta / 2.f);
+        
+        if( bSend )
+        {
+           angle.y += maxDelta / 2.f;
+           AntiAim::fakeAngle = angle; 
+           //AntiAim::fakeAngle.y = AntiAim::LastTickViewAngle.y + (maxDelta / 2.f);
+           
+        } 
+        else 
+        {
+            angle.y -= maxDelta / 2.f;
+            AntiAim::realAngle = angle;
+            //angle.y = AntiAim::realAngle.y = AntiAim::LastTickViewAngle.y - (maxDelta / 2.f);
+        }
+        
+        
+    }
+    else 
+    {
+        //angle.y = bSend ? AntiAim::realAngle.y = CreateMove::lastTickViewAngles.y + (maxDelta / 2.f) : AntiAim::fakeAngle.y = CreateMove::lastTickViewAngles.y - (maxDelta / 2.f);
+        
+        if( bSend )
+        {
+            angle.y -= maxDelta / 2.f;
+            AntiAim::fakeAngle = angle;
+           //angle.y = AntiAim::fakeAngle.y = AntiAim::LastTickViewAngle.y - (maxDelta / 2.f);
+        } 
+        else 
+        {
+            angle.y += maxDelta / 2.f;
+            AntiAim::realAngle = angle;
+            //angle.y = AntiAim::realAngle.y = AntiAim::LastTickViewAngle.y + (maxDelta / 2.f);
+        }
+    }
+}
+
 void AntiAim::CreateMove(CUserCmd* cmd)
 {
-    if (!Settings::AntiAim::Yaw::enabled && !Settings::AntiAim::Pitch::enabled && !Settings::AntiAim::LBYBreaker::enabled)
+    if (!Settings::AntiAim::Yaw::enabled && !Settings::AntiAim::Pitch::enabled && !Settings::AntiAim::LBYBreaker::enabled && !Settings::AntiAim::LegitAntiAim::enable)
         return;
 
     if (Settings::Legitbot::AimStep::enabled && Legitbot::aimStepInProgress)
@@ -191,8 +242,8 @@ void AntiAim::CreateMove(CUserCmd* cmd)
     float oldForward = cmd->forwardmove;
     float oldSideMove = cmd->sidemove;
     
-    AntiAim::realAngle = AntiAim::fakeAngle = CreateMove::lastTickViewAngles;
-
+    //AntiAim::realAngle = AntiAim::fakeAngle = CreateMove::lastTickViewAngles;
+    //AntiAim::LastTickViewAngle = CreateMove::lastTickViewAngles;
     QAngle angle = cmd->viewangles;
 
     C_BasePlayer* localplayer = (C_BasePlayer*) entityList->GetClientEntity(engine->GetLocalPlayer());
@@ -208,21 +259,36 @@ void AntiAim::CreateMove(CUserCmd* cmd)
         C_BaseCSGrenade* csGrenade = (C_BaseCSGrenade*) activeWeapon;
 
         if (csGrenade->GetThrowTime() > 0.f)
+        {
+            AntiAim::realAngle = AntiAim::fakeAngle = CreateMove::lastTickViewAngles;
             return;
+        }
     }
 
     if (cmd->buttons & IN_USE || cmd->buttons & IN_ATTACK || (cmd->buttons & IN_ATTACK2 && *activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_REVOLVER))
+    {
+        AntiAim::realAngle = AntiAim::fakeAngle = CreateMove::lastTickViewAngles;
         return;
+    }
 
     if (localplayer->GetMoveType() == MOVETYPE_LADDER || localplayer->GetMoveType() == MOVETYPE_NOCLIP)
+    {
+        AntiAim::realAngle = AntiAim::fakeAngle = CreateMove::lastTickViewAngles;
         return;
+    }    
 
     // Knife
     if (Settings::AntiAim::AutoDisable::knifeHeld && localplayer->GetAlive() && activeWeapon->GetCSWpnData()->GetWeaponType() == CSWeaponType::WEAPONTYPE_KNIFE)
+    {
+        AntiAim::realAngle = AntiAim::fakeAngle = CreateMove::lastTickViewAngles;
         return;
+    }
 
     if (Settings::AntiAim::AutoDisable::noEnemy && localplayer->GetAlive() && !HasViableEnemy())
+    {
+        AntiAim::realAngle = AntiAim::fakeAngle = CreateMove::lastTickViewAngles;
         return;
+    }
 
     QAngle edge_angle = angle;
     bool edging_head = Settings::AntiAim::HeadEdge::enabled && GetBestHeadAngle(edge_angle);
@@ -257,13 +323,18 @@ void AntiAim::CreateMove(CUserCmd* cmd)
         }
     }
 
-    if (Settings::AntiAim::Yaw::enabled && !needToFlick)
+    else if (Settings::AntiAim::Yaw::enabled && !needToFlick) // responsible for reage anti aim or varity of anti aims .. 
     {
         DoAntiAimY(localplayer, angle, bSend);
 
         CreateMove::sendPacket = bSend;
         if (Settings::AntiAim::HeadEdge::enabled && edging_head && !bSend)
             angle.y = edge_angle.y;
+    }
+    else if (Settings::AntiAim::LegitAntiAim::enable && !needToFlick) // Responsible for legit anti aim activated when the legit anti aim is enabled
+    {
+        DoLegitAntiAim(localplayer, angle, bSend);
+        CreateMove::sendPacket = bSend;
     }
 
     if (!ValveDSCheck::forceUT && (*csGameRules) && (*csGameRules)->IsValveDS())

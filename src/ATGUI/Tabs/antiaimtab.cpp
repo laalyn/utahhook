@@ -1,10 +1,11 @@
-#include "hvhtab.h"
+#include "antiaimtab.h"
 
 #include "../../interfaces.h"
 #include "../../Utils/xorstring.h"
 #include "../../settings.h"
 #include "../../Hacks/valvedscheck.h"
 #include "../../ImGUI/imgui_internal.h"
+#include "../atgui.h"
 
 #pragma GCC diagnostic ignored "-Wformat-security"
 
@@ -26,6 +27,15 @@ void HvH::RenderTab()
             ImGui::Text(XORSTR("AntiAim"));
             ImGui::BeginChild(XORSTR("##ANTIAIM"), ImVec2(0, 0), true);
             {
+
+                /*
+                * part where legit anti aim ui constructed
+                */
+                ImGui::Checkbox(XORSTR("Legit AntiAim"), &Settings::AntiAim::LegitAntiAim::enable);
+                UI::KeyBindButton(&Settings::AntiAim::LegitAntiAim::InvertKey);
+                /*
+                * End of legit antiaim
+                */
                 ImGui::Checkbox(XORSTR("Yaw"), &Settings::AntiAim::Yaw::enabled);
                 ImGui::Separator();
                 ImGui::Columns(2, nullptr, true);

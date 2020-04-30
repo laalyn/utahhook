@@ -360,14 +360,13 @@ static void RagebotRCS(QAngle& angle, C_BasePlayer* player, CUserCmd* cmd, C_Bas
 	if (!(cmd->buttons & IN_ATTACK))
 		return;
 	
-
 	static QAngle RagebotRCSLastPunch = {0,0,0};
 	bool hasTarget = RagebotShouldAim && player;
 	
 	float aimpunch = cvar->FindVar("weapon_recoil_scale")->GetFloat();
 	QAngle CurrentPunch = *localplayer->GetAimPunchAngle();
 
-	if ( Settings::Ragebot::silent && hasTarget )
+	if ( Settings::Ragebot::silent || hasTarget )
 	{
 		angle.x -= CurrentPunch.x * 2.0f;
 		angle.y -= CurrentPunch.y * 2.0f;
@@ -516,6 +515,32 @@ static void RagebotAutoPistol(C_BaseCombatWeapon* activeWeapon, CUserCmd* cmd)
 
     if (*activeWeapon->GetItemDefinitionIndex() != ItemDefinitionIndex::WEAPON_REVOLVER)
         cmd->buttons &= ~IN_ATTACK;
+}
+
+static void AutoCock(C_BasePlayer* player, C_BaseCombatWeapon* activeWeapon, CUserCmd* cmd)
+{
+    if (!Settings::Ragebot::AutoShoot::enabled)
+        return;
+
+    if (*activeWeapon->GetItemDefinitionIndex() != ItemDefinitionIndex::WEAPON_REVOLVER)
+        return;
+
+    if(activeWeapon->GetAmmo() == 0)
+        return;
+    if (cmd->buttons & IN_USE)
+        return;
+
+    cmd->buttons |= IN_ATTACK;
+    float postponeFireReadyTime = activeWeapon->GetPostPoneReadyTime();
+    if (postponeFireReadyTime > 0)
+    {
+        if (postponeFireReadyTime < globalVars->curtime)
+        {
+            if (player)
+                return;
+            cmd->buttons &= ~IN_ATTACK;
+        }
+    }
 }
 
 static void RagebotAutoShoot(C_BasePlayer* player, C_BaseCombatWeapon* activeWeapon, CUserCmd* cmd)
@@ -675,6 +700,7 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 	RagebotAutoSlow(player, oldForward, oldSideMove, bestDamage, activeWeapon, cmd);
 	RagebotAutoPistol(activeWeapon, cmd);
 	RagebotAutoShoot(player, activeWeapon, cmd);
+	AutoCock(player,activeWeapon, cmd);
 	RagebotRCS(angle, player, cmd, localplayer, activeWeapon);
 
     Math::NormalizeAngles(angle);
