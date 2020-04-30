@@ -20,22 +20,29 @@ void HvH::RenderTab()
             "FAKE UP", "FAKE DOWN", "LISP DOWN", "ANGEL DOWN", "ANGEL UP" // untrusted
     };
 
-    ImGui::Columns(2, nullptr, true);
+    ImGui::Columns(2, nullptr, false);
     {
+        
         ImGui::BeginChild(XORSTR("HVH1"), ImVec2(0, 0), true);
         {
+
             ImGui::Text(XORSTR("AntiAim"));
             ImGui::BeginChild(XORSTR("##ANTIAIM"), ImVec2(0, 0), true);
             {
-
                 /*
                 * part where legit anti aim ui constructed
                 */
-                ImGui::Checkbox(XORSTR("Legit AntiAim"), &Settings::AntiAim::LegitAntiAim::enable);
-                UI::KeyBindButton(&Settings::AntiAim::LegitAntiAim::InvertKey);
+                ImGui::Columns(1, nullptr, true);
+                ImGui::Text(XORSTR("Legit AntiAim"));
+                ImGui::Separator();
+                ImGui::Checkbox(XORSTR("Enable"), &Settings::AntiAim::LegitAntiAim::enable);
+                UI::KeyBindButton(&Settings::AntiAim::LegitAntiAim::InvertKey);   
                 /*
                 * End of legit antiaim
                 */
+                ImGui::Spacing();
+                ImGui::Spacing();
+                ImGui::Separator();
                 ImGui::Checkbox(XORSTR("Yaw"), &Settings::AntiAim::Yaw::enabled);
                 ImGui::Separator();
                 ImGui::Columns(2, nullptr, true);

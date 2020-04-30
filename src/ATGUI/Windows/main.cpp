@@ -110,6 +110,7 @@ void Main::RenderWindow()
 				Misc::RenderTab();
 				break;
 		}
+		ImGui::Separator();
 		ImGui::End();
 	}
 }
