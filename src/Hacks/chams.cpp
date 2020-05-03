@@ -1,4 +1,6 @@
 #include "chams.h"
+#include "thirdperson.h"
+#include "antiaim.h"
 
 #include "../Utils/xorstring.h"
 #include "../Utils/entity.h"
@@ -23,8 +25,9 @@ static void DrawPlayer(void* thisptr, void* context, void *state, const ModelRen
 	C_BasePlayer* localplayer = (C_BasePlayer*) entityList->GetClientEntity(engine->GetLocalPlayer());
 	if (!localplayer)
 		return;
-
+	
 	C_BasePlayer* entity = (C_BasePlayer*) entityList->GetClientEntity(pInfo.entity_index);
+	
 	if (!entity
 		|| entity->GetDormant()
 		|| !entity->GetAlive())
@@ -41,17 +44,21 @@ static void DrawPlayer(void* thisptr, void* context, void *state, const ModelRen
 
 	IMaterial* visible_material = nullptr;
 	IMaterial* hidden_material = nullptr;
+	IMaterial* Fake_meterial = nullptr;
+	
 
 	switch (Settings::ESP::Chams::type)
 	{
 		case ChamsType::CHAMS:
 		case ChamsType::CHAMS_XQZ:
 			visible_material = materialChams;
+			Fake_meterial = materialChams;
 			hidden_material = materialChamsIgnorez;
 			break;
 		case ChamsType::CHAMS_FLAT:
 		case ChamsType::CHAMS_FLAT_XQZ:
 			visible_material = materialChamsFlat;
+			Fake_meterial = materialChamsFlat;
 			hidden_material = materialChamsFlatIgnorez;
 			break;
 	}
@@ -61,10 +68,11 @@ static void DrawPlayer(void* thisptr, void* context, void *state, const ModelRen
 
 	if (entity == localplayer)
 	{
+		*entity->GetVAngles() = AntiAim::realAngle;
 		Color visColor = Color::FromImColor(Settings::ESP::Chams::localplayerColor.Color(entity));
 		Color color = visColor;
 		color *= 0.45f;
-
+		//ThirdPerson::SWITCH ? visible_material->ColorModulate(visColor) : visible_material->ColorModulate(fakeColor);
 		visible_material->ColorModulate(visColor);
 		hidden_material->ColorModulate(color);
 
@@ -105,6 +113,7 @@ static void DrawPlayer(void* thisptr, void* context, void *state, const ModelRen
 	}
 
 	modelRender->ForcedMaterialOverride(visible_material);
+	// modelRender->DrawModelExecute(nullptr, nullptr, )
 	// No need to call DME again, it already gets called in DrawModelExecute.cpp
 }
 

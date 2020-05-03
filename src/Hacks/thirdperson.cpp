@@ -21,29 +21,43 @@ void ThirdPerson::OverrideView(CViewSetup *pSetup)
 
 	if(localplayer->GetAlive() && Settings::ThirdPerson::enabled && !engine->IsTakingScreenshot())
 	{
-		QAngle viewAngles;
-		engine->GetViewAngles(viewAngles);
-		trace_t tr;
-		Ray_t traceRay;
-		Vector eyePos = localplayer->GetEyePosition();
+		if (inputSystem->IsButtonDown(Settings::ThirdPerson::toggleThirdPerson))
+			Settings::ThirdPerson::toggled = !Settings::ThirdPerson::toggled;
 
-		Vector camOff = Vector(cos(DEG2RAD(viewAngles.y)) * Settings::ThirdPerson::distance,
-							   sin(DEG2RAD(viewAngles.y)) * Settings::ThirdPerson::distance,
-							   sin(DEG2RAD(-viewAngles.x)) * Settings::ThirdPerson::distance);
+		if (Settings::ThirdPerson::toggled)
+		{
+			QAngle viewAngles;
+			engine->GetViewAngles(viewAngles);
+			trace_t tr;
+			Ray_t traceRay;
+			Vector eyePos = localplayer->GetEyePosition();
 
-		traceRay.Init(eyePos, (eyePos - camOff));
-		CTraceFilter traceFilter;
-		traceFilter.pSkip = localplayer;
-		trace->TraceRay(traceRay, MASK_SOLID, &traceFilter, &tr);
+			Vector camOff = Vector(cos(DEG2RAD(viewAngles.y)) * Settings::ThirdPerson::distance,
+							   		sin(DEG2RAD(viewAngles.y)) * Settings::ThirdPerson::distance,
+							   		sin(DEG2RAD(-viewAngles.x)) * Settings::ThirdPerson::distance);
 
-        input->m_fCameraInThirdPerson = true;
-		input->m_vecCameraOffset = Vector(viewAngles.x, viewAngles.y, Settings::ThirdPerson::distance * ((tr.fraction < 1.0f) ? tr.fraction : 1.0f) );
+			traceRay.Init(eyePos, (eyePos - camOff));
+			CTraceFilter traceFilter;
+			traceFilter.pSkip = localplayer;
+			trace->TraceRay(traceRay, MASK_SOLID, &traceFilter, &tr);
+
+       	 	input->m_fCameraInThirdPerson = true;
+			input->m_vecCameraOffset = Vector(viewAngles.x, viewAngles.y, Settings::ThirdPerson::distance * ((tr.fraction < 1.0f) ? tr.fraction : 1.0f) );
+		}
+		else
+		{
+			input->m_fCameraInThirdPerson = false;
+			input->m_vecCameraOffset = Vector(0.f, 0.f, 0.f);
+		}
+		
 	}
 	else if(input->m_fCameraInThirdPerson)
 	{
 		input->m_fCameraInThirdPerson = false;
 		input->m_vecCameraOffset = Vector(0.f, 0.f, 0.f);
 	}
+
+	
 }
 
 
@@ -55,7 +69,14 @@ void ThirdPerson::FrameStageNotify(ClientFrameStage_t stage)
 
 		if (localplayer && localplayer->GetAlive() && Settings::ThirdPerson::enabled && input->m_fCameraInThirdPerson)
 		{
-            switch (Settings::ThirdPerson::type)
+			
+			//ThirdPerson::SWITCH = !ThirdPerson::SWITCH;
+			if (Settings::AntiAim::Yaw::enabled)
+				*localplayer->GetVAngles() = AntiAim::realAngle;
+			
+			//*localplayer->GetVAngles() = SWITCH ? AntiAim::realAngle : AntiAim::fakeAngle;
+
+            /*switch (Settings::ThirdPerson::type)
             {
                 case ShowedAngle::REAL:
                     *localplayer->GetVAngles() = AntiAim::realAngle;
@@ -63,7 +84,7 @@ void ThirdPerson::FrameStageNotify(ClientFrameStage_t stage)
                 case ShowedAngle::FAKE:
                     *localplayer->GetVAngles() = AntiAim::fakeAngle;
                     break;
-            }
+            }*/
 		}
 	}
 }

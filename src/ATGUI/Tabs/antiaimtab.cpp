@@ -32,18 +32,18 @@ void HvH::RenderTab()
                 /*
                 * part where legit anti aim ui constructed
                 */
-                ImGui::Columns(1, nullptr, true);
-                ImGui::Text(XORSTR("Legit AntiAim"));
-                ImGui::Separator();
-                ImGui::Checkbox(XORSTR("Enable"), &Settings::AntiAim::LegitAntiAim::enable);
-                UI::KeyBindButton(&Settings::AntiAim::LegitAntiAim::InvertKey);   
+                // ImGui::Columns(1, nullptr, true);
+                // ImGui::Text(XORSTR("Legit AntiAim"));
+                // ImGui::Separator();
+                // ImGui::Checkbox(XORSTR("Enable"), &Settings::AntiAim::LegitAntiAim::enable);
+                // UI::KeyBindButton(&Settings::AntiAim::LegitAntiAim::InvertKey);   
                 /*
                 * End of legit antiaim
                 */
                 ImGui::Spacing();
                 ImGui::Spacing();
                 ImGui::Separator();
-                ImGui::Checkbox(XORSTR("Yaw"), &Settings::AntiAim::Yaw::enabled);
+                ImGui::Checkbox(XORSTR("Rage AntiAim"), &Settings::AntiAim::Yaw::enabled);
                 ImGui::Separator();
                 ImGui::Columns(2, nullptr, true);
                 {

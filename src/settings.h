@@ -910,6 +910,7 @@ namespace Settings
             inline HealthColorVar enemyColor = ImColor(255, 0, 0, 255);
             inline HealthColorVar enemyVisibleColor = ImColor(255, 255, 0, 255);
             inline HealthColorVar localplayerColor = ImColor(0, 255, 255, 255);
+			inline HealthColorVar FakeColor = ImColor(124,145,25,255);
 			inline ChamsType type = ChamsType::CHAMS;
 
 			namespace Arms
