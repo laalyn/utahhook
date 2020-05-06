@@ -12,7 +12,7 @@
 #include "interfaces.h"
 #include "SDK/IGameEvent.h"
 #include "settings.h"
-#include "resolverNimbus.h"
+#include "Hacks/resolverNimbus.h"
 
 EventListener::EventListener(std::vector<const char*> events)
 {

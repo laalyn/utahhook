@@ -12,7 +12,7 @@
 #include "../Hacks/nosmoke.h"
 #include "../Hacks/thirdperson.h"
 #include "../settings.h"
-#include "resolverNimbus.h"
+#include "../Hacks/resolverNimbus.h"
 
 typedef void (*FrameStageNotifyFn) (void*, ClientFrameStage_t);
 

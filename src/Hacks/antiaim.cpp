@@ -11,6 +11,7 @@
 
 
 QAngle AntiAim::LastTickViewAngle;
+static bool bSend = true;
 
 float AntiAim::GetMaxDelta( CCSGOAnimState *animState ) 
 {
@@ -120,14 +121,14 @@ static void DoAntiAimY(C_BasePlayer *const localplayer, QAngle& angle, bool bSen
                 AntiAim::fakeAngle.y = AntiAim::realAngle.y;
                 break;
             case AntiAimType_Y::MAX_DELTA_LEFT:
-                angle.y = AntiAim::realAngle.y - maxDelta;
+                angle.y = AntiAim::realAngle.y - (maxDelta);
                 break;
             case AntiAimType_Y::MAX_DELTA_RIGHT:
-                angle.y = AntiAim::realAngle.y + maxDelta;
+                angle.y = AntiAim::realAngle.y + (maxDelta);
                 break;
             case AntiAimType_Y::MAX_DELTA_FLIPPER:
                 bFlip = !bFlip;
-                angle.y = bFlip ? AntiAim::realAngle.y - maxDelta : AntiAim::realAngle.y + maxDelta;
+                angle.y = bFlip ? AntiAim::realAngle.y - (maxDelta / 2.f) : AntiAim::realAngle.y + (maxDelta / 2.f);
                 break;
             case AntiAimType_Y::MAX_DELTA_LBY_AVOID:
                 break;
@@ -140,7 +141,6 @@ static void DoAntiAimY(C_BasePlayer *const localplayer, QAngle& angle, bool bSen
         switch (Real_aa_type)
         {
             case AntiAimType_Y::NONE:
-                AntiAim::realAngle.y = angle.y;
                 break;
             case AntiAimType_Y::MAX_DELTA_LEFT:
                 angle.y -= 90.f;
@@ -244,6 +244,7 @@ void AntiAim::CreateMove(CUserCmd* cmd)
     
     QAngle angle = cmd->viewangles;
 
+    AntiAim::fakeAngle = CreateMove::lastTickViewAngles;
     C_BasePlayer* localplayer = (C_BasePlayer*) entityList->GetClientEntity(engine->GetLocalPlayer());
     if (!localplayer || !localplayer->GetAlive())
         return;
@@ -291,7 +292,7 @@ void AntiAim::CreateMove(CUserCmd* cmd)
     QAngle edge_angle = angle;
     bool edging_head = Settings::AntiAim::HeadEdge::enabled && GetBestHeadAngle(edge_angle);
 
-    static bool bSend = true;
+    
     bSend = !bSend;
 
     bool should_clamp = true;
