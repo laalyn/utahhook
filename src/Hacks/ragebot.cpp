@@ -537,7 +537,12 @@ static void AutoCock(C_BasePlayer* player, C_BaseCombatWeapon* activeWeapon, CUs
         if (postponeFireReadyTime < globalVars->curtime)
         {
             if (player)
-                return;
+			{
+				Ragebot::coacking = false;
+				return;
+			}
+                
+			Ragebot::coacking = true;
             cmd->buttons &= ~IN_ATTACK;
         }
     }

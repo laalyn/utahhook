@@ -40,9 +40,9 @@ void HvH::RenderTab()
                 /*
                 * End of legit antiaim
                 */
-                ImGui::Spacing();
-                ImGui::Spacing();
-                ImGui::Separator();
+                // ImGui::Spacing();
+                // // ImGui::Spacing();
+                // ImGui::Separator();
                 ImGui::Checkbox(XORSTR("Rage AntiAim"), &Settings::AntiAim::Yaw::enabled);
                 ImGui::Separator();
                 ImGui::Columns(2, nullptr, true);
@@ -57,7 +57,7 @@ void HvH::RenderTab()
                     ImGui::PushItemWidth(-1);
                     ImGui::Combo(XORSTR("##YFAKETYPE"), (int*)& Settings::AntiAim::Yaw::typeFake, yTypes, IM_ARRAYSIZE(yTypes));
 
-                    ImGui::Combo(XORSTR("##YACTUALTYPE"), (int*)& Settings::AntiAim::Yaw::type, yTypes, IM_ARRAYSIZE(yTypes));
+                    ImGui::Combo(XORSTR("##YACTUALTYPE"), (int*)& Settings::AntiAim::Yaw::typeReal, yTypes, IM_ARRAYSIZE(yTypes));
                     ImGui::PopItemWidth();
                 }
                 ImGui::Columns(1);
@@ -127,9 +127,6 @@ void HvH::RenderTab()
     {
         ImGui::BeginChild(XORSTR("HVH2"), ImVec2(0, 0), true);
         {
-            ImGui::Text(XORSTR("Resolver"));
-            ImGui::Separator();
-            ImGui::Checkbox(XORSTR("Resolve All"), &Settings::Resolver::resolveAll);
             ImGui::Separator();
             ImGui::Text(XORSTR("Movement"));
             ImGui::Checkbox(XORSTR("Auto Crouch"), &Settings::Legitbot::AutoCrouch::enabled);

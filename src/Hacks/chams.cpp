@@ -4,9 +4,11 @@
 
 #include "../Utils/xorstring.h"
 #include "../Utils/entity.h"
+#include "../Utils/math.h"
 #include "../settings.h"
 #include "../interfaces.h"
 #include "../Hooks/hooks.h"
+// #include "../SDK/VMatrix.h"
 
 IMaterial* materialChams;
 IMaterial* materialChamsIgnorez;
@@ -44,7 +46,6 @@ static void DrawPlayer(void* thisptr, void* context, void *state, const ModelRen
 
 	IMaterial* visible_material = nullptr;
 	IMaterial* hidden_material = nullptr;
-	IMaterial* Fake_meterial = nullptr;
 	
 
 	switch (Settings::ESP::Chams::type)
@@ -52,27 +53,24 @@ static void DrawPlayer(void* thisptr, void* context, void *state, const ModelRen
 		case ChamsType::CHAMS:
 		case ChamsType::CHAMS_XQZ:
 			visible_material = materialChams;
-			Fake_meterial = materialChams;
 			hidden_material = materialChamsIgnorez;
 			break;
 		case ChamsType::CHAMS_FLAT:
 		case ChamsType::CHAMS_FLAT_XQZ:
 			visible_material = materialChamsFlat;
-			Fake_meterial = materialChamsFlat;
 			hidden_material = materialChamsFlatIgnorez;
 			break;
 	}
 
-	visible_material->AlphaModulate(1.0f);
-	hidden_material->AlphaModulate(1.0f);
+	visible_material->AlphaModulate(1.f);
+	hidden_material->AlphaModulate(1.f);
 
 	if (entity == localplayer)
 	{
-		*entity->GetVAngles() = AntiAim::realAngle;
 		Color visColor = Color::FromImColor(Settings::ESP::Chams::localplayerColor.Color(entity));
 		Color color = visColor;
 		color *= 0.45f;
-		//ThirdPerson::SWITCH ? visible_material->ColorModulate(visColor) : visible_material->ColorModulate(fakeColor);
+		
 		visible_material->ColorModulate(visColor);
 		hidden_material->ColorModulate(color);
 
@@ -112,9 +110,81 @@ static void DrawPlayer(void* thisptr, void* context, void *state, const ModelRen
 		modelRenderVMT->GetOriginalMethod<DrawModelExecuteFn>(21)(thisptr, context, state, pInfo, pCustomBoneToWorld);
 	}
 
+
 	modelRender->ForcedMaterialOverride(visible_material);
 	// modelRender->DrawModelExecute(nullptr, nullptr, )
 	// No need to call DME again, it already gets called in DrawModelExecute.cpp
+}
+
+static void DrawFake(void* thisptr, void* context, void *state, const ModelRenderInfo_t &pInfo, matrix3x4_t* pCustomBoneToWorld)
+{
+
+	if (!Settings::AntiAim::Yaw::enabled)
+		return;
+
+	C_BasePlayer* localplayer = (C_BasePlayer*) entityList->GetClientEntity(engine->GetLocalPlayer());
+	if (!localplayer)
+		return;
+	
+	C_BasePlayer* entity = (C_BasePlayer*) entityList->GetClientEntity(pInfo.entity_index);
+	
+	if (!entity
+		|| entity->GetDormant()
+		|| !entity->GetAlive())
+		return;
+
+	IMaterial* Fake_meterial = nullptr;
+	
+	Fake_meterial = materialChams;
+	Fake_meterial->AlphaModulate(1.f);
+
+	if (entity == localplayer)
+	{
+		/*
+		* Testing for chams in fake angle 
+		* Hope for best
+		*/
+
+		Color fake_color = Color::FromImColor(Settings::ESP::Chams::FakeColor.Color(entity));
+		Color color = fake_color;
+		color *= 0.45f;
+
+		Fake_meterial->ColorModulate(fake_color);
+		Fake_meterial->AlphaModulate(Settings::ESP::Chams::FakeColor.Color(entity).Value.w);
+
+		static matrix3x4_t fakeBoneMatrix[128];
+		float fakeangle = AntiAim::fakeAngle.y - AntiAim::realAngle.y;
+		static Vector OutPos;
+		for (int i = 0; i < 128; i++)
+		{
+			Math::AngleMatrix(Vector(0, fakeangle, 0), fakeBoneMatrix[i]);
+			matrix::MatrixMultiply(fakeBoneMatrix[i], pCustomBoneToWorld[i]);
+			Vector BonePos = Vector(pCustomBoneToWorld[i][0][3], pCustomBoneToWorld[i][1][3], pCustomBoneToWorld[i][2][3]) - pInfo.origin;
+			Math::VectorRotate(BonePos, Vector(0, fakeangle, 0), OutPos);
+			OutPos += pInfo.origin;
+                            fakeBoneMatrix[i][0][3] = OutPos.x;
+                            fakeBoneMatrix[i][1][3] = OutPos.y;
+                            fakeBoneMatrix[i][2][3] = OutPos.z;
+		}
+
+		if (entity->GetImmune())
+		{
+			Fake_meterial->AlphaModulate(0.5f);
+		}
+		//entity->SetupBones
+		modelRender->ForcedMaterialOverride(Fake_meterial);
+		modelRenderVMT->GetOriginalMethod<DrawModelExecuteFn>(21)(thisptr, context, state, pInfo, fakeBoneMatrix);
+		//modelRenderVMT->ApplyVMT();
+		
+		// End of chams for fake angle
+	
+	}
+	else
+	{
+		return;
+	}
+
+	
 }
 
 static void DrawWeapon(const ModelRenderInfo_t& pInfo)
@@ -181,7 +251,12 @@ void Chams::DrawModelExecute(void* thisptr, void* context, void *state, const Mo
 	std::string modelName = modelInfo->GetModelName(pInfo.pModel);
 
 	if (modelName.find(XORSTR("models/player")) != std::string::npos)
+	{
+		DrawFake(thisptr, context, state, pInfo, pCustomBoneToWorld);
 		DrawPlayer(thisptr, context, state, pInfo, pCustomBoneToWorld);
+		
+	}
+		
 	else if (modelName.find(XORSTR("arms")) != std::string::npos)
 		DrawArms(pInfo);
 	else if (modelName.find(XORSTR("weapon")) != std::string::npos)

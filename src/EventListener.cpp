@@ -11,6 +11,7 @@
 #include "Hacks/valvedscheck.h"
 #include "interfaces.h"
 #include "SDK/IGameEvent.h"
+#include "Hacks/resolverNimbus.h"
 
 EventListener::EventListener(std::vector<const char*> events)
 {

@@ -11,6 +11,7 @@
 #include "../Hacks/asuswalls.h"
 #include "../Hacks/nosmoke.h"
 #include "../Hacks/thirdperson.h"
+#include "../Hacks/resolverNimbus.h"
 
 typedef void (*FrameStageNotifyFn) (void*, ClientFrameStage_t);
 
@@ -36,5 +37,6 @@ void Hooks::FrameStageNotify(void* thisptr, ClientFrameStage_t stage)
 	clientVMT->GetOriginalMethod<FrameStageNotifyFn>(37)(thisptr, stage);
 
 	Resolver::PostFrameStageNotify(stage);
+	ResolverNimbus::FrameStageNotify(stage);
 	View::PostFrameStageNotify(stage);
 }

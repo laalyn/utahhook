@@ -479,7 +479,7 @@ static void DrawSkeleton( C_BasePlayer* player, C_BasePlayer* localplayer ) {
 			continue;
 
 		Draw::AddLine( vBonePos1.x, vBonePos1.y, vBonePos2.x, vBonePos2.y, Entity::IsTeamMate(player, localplayer) ? Settings::ESP::Skeleton::allyColor.Color() : Settings::ESP::Skeleton::enemyColor.Color());
-		//Draw::AddLine( vBonePos1.x + 90.f, vBonePos1.y, vBonePos2.x, vBonePos2.y , Entity::IsTeamMate(player, localplayer) ? Settings::ESP::Skeleton::allyColor.Color() : Settings::ESP::Skeleton::enemyColor.Color());
+	
 	}
 }
 
@@ -1501,7 +1501,6 @@ void ESP::Paint()
 		if (client->m_ClassID == EClassIds::CCSPlayer && (Settings::ESP::Filters::enemies || Settings::ESP::Filters::allies || (Settings::ESP::Filters::localplayer && Settings::ThirdPerson::enabled)))
 		{
 			C_BasePlayer* player = (C_BasePlayer*) entity;
-			C_BasePlayer* fakePlayer = (C_BasePlayer*) entity;
 
 			if (player->GetDormant() || !player->GetAlive())
 				continue;

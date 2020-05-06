@@ -7,9 +7,9 @@
 #include "../Utils/entity.h"
 #include "../interfaces.h"
 #include "valvedscheck.h"
+#include "ragebot.h"
 
-QAngle AntiAim::realAngle;
-QAngle AntiAim::fakeAngle;
+
 QAngle AntiAim::LastTickViewAngle;
 
 float AntiAim::GetMaxDelta( CCSGOAnimState *animState ) 
@@ -107,6 +107,7 @@ static bool HasViableEnemy()
 static void DoAntiAimY(C_BasePlayer *const localplayer, QAngle& angle, bool bSend)
 {
     AntiAimType_Y Fake_aa_type = Settings::AntiAim::Yaw::typeFake;
+    AntiAimType_Y Real_aa_type = Settings::AntiAim::Yaw::typeReal;
 
     float maxDelta = AntiAim::GetMaxDelta(localplayer->GetAnimState());
     static bool bFlip = false;
@@ -116,17 +117,17 @@ static void DoAntiAimY(C_BasePlayer *const localplayer, QAngle& angle, bool bSen
         switch (Fake_aa_type)
         {
             case AntiAimType_Y::MAX_DELTA_LEFT:
-                angle.y = AntiAim::realAngle.y - maxDelta;
+                angle.y -= maxDelta;
                 break;
             case AntiAimType_Y::MAX_DELTA_RIGHT:
-                angle.y = AntiAim::realAngle.y + maxDelta;
+                angle.y += maxDelta;
                 break;
             case AntiAimType_Y::MAX_DELTA_FLIPPER:
                 bFlip = !bFlip;
-                angle.y = bFlip ? AntiAim::realAngle.y - maxDelta : AntiAim::realAngle.y + maxDelta;
+                angle.y = bFlip ? angle.y - maxDelta : angle.y + maxDelta;
                 break;
             case AntiAimType_Y::MAX_DELTA_LBY_AVOID:
-
+                angle.y += 180.f;
                 break;
             default:
                 break;
@@ -134,7 +135,25 @@ static void DoAntiAimY(C_BasePlayer *const localplayer, QAngle& angle, bool bSen
 
         AntiAim::fakeAngle.y = angle.y;
     } else {
-        AntiAim::realAngle.y = angle.y - 180.f;
+        switch (Real_aa_type)
+        {
+            case AntiAimType_Y::MAX_DELTA_LEFT:
+                angle.y -= maxDelta;
+                break;
+            case AntiAimType_Y::MAX_DELTA_RIGHT:
+                angle.y += maxDelta;
+                break;
+            case AntiAimType_Y::MAX_DELTA_FLIPPER:
+                bFlip = !bFlip;
+                angle.y = bFlip ? angle.y - maxDelta : angle.y + maxDelta;
+                break;
+            case AntiAimType_Y::MAX_DELTA_LBY_AVOID:
+                angle.y += 180.f;
+                break;
+            default:
+                break;
+        }
+        AntiAim::realAngle.y = angle.y;
     }
 }
 
@@ -239,7 +258,7 @@ void AntiAim::CreateMove(CUserCmd* cmd)
         }
     }
 
-    if (/*cmd->buttons & IN_USE ||*/ cmd->buttons & IN_ATTACK || (cmd->buttons & IN_ATTACK2 && *activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_REVOLVER))
+    if (cmd->buttons & IN_USE || cmd->buttons & IN_ATTACK || (cmd->buttons & IN_ATTACK2 && *activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_REVOLVER) && !Ragebot::coacking == true)
     {
         AntiAim::realAngle = AntiAim::fakeAngle = angle;
         return;
