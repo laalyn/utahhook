@@ -63,7 +63,7 @@ bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
 			}
 			else if( Settings::Ragebot::enabled)
 			{
-				std::async(std::launch::async, Ragebot::CreateMove, cmd);
+				Ragebot::CreateMove(cmd);
 			}
 			AutoKnife::CreateMove(cmd);
             AntiAim::CreateMove(cmd);

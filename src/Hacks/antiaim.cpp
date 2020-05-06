@@ -128,7 +128,7 @@ static void DoAntiAimY(C_BasePlayer *const localplayer, QAngle& angle, bool bSen
                 break;
             case AntiAimType_Y::MAX_DELTA_FLIPPER:
                 bFlip = !bFlip;
-                angle.y = bFlip ? AntiAim::realAngle.y - (maxDelta / 2.f) : AntiAim::realAngle.y + (maxDelta / 2.f);
+                angle.y = bFlip ? AntiAim::realAngle.y - maxDelta : AntiAim::realAngle.y + maxDelta;
                 break;
             case AntiAimType_Y::MAX_DELTA_LBY_AVOID:
                 break;
@@ -141,6 +141,7 @@ static void DoAntiAimY(C_BasePlayer *const localplayer, QAngle& angle, bool bSen
         switch (Real_aa_type)
         {
             case AntiAimType_Y::NONE:
+                AntiAim::realAngle = angle;
                 break;
             case AntiAimType_Y::MAX_DELTA_LEFT:
                 angle.y -= 90.f;
