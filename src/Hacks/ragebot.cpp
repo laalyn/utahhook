@@ -12,7 +12,7 @@
 std::vector<int64_t> Ragebot::friends = { };
 std::vector<long> RagebotkillTimes = { 0 }; // the Epoch time from when we kill someone
 
-static bool RagebotShouldAim = false, EnemyPresent = false;
+inline bool RagebotShouldAim = false, EnemyPresent = false;
 int prevWeaponIndex = 0;
 const int headVectors = 7;
 
@@ -231,8 +231,6 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 				VisibleSpot = {NULL,NULL,NULL};
 		 
 		GetBestSpotAndDamage(player, wallBangSpot, WallBangdamage, VisibleSpot, VisibleDamage);
-		//float VisibleDamage = GetClosestDamageSpot(cmd, localplayer, player, VisibleSpot);
-		//Vector tempSpot = GetClosestSpot(cmd, localplayer, player);
 		C_BaseCombatWeapon* activeWeapon = (C_BaseCombatWeapon*) entityList->GetClientEntityFromHandle(localplayer->GetActiveWeapon());
 		float playerHelth = player->GetHealth();
 		if( !wallBangSpot.IsZero() && WallBangdamage > 0.f  && !VisibleSpot.IsZero() && VisibleDamage > 0.f )
@@ -326,7 +324,7 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 }
 
 //Hitchance
-bool Ragebothitchance(C_BasePlayer* localplayer, C_BaseCombatWeapon* activeWeapon)
+static bool Ragebothitchance(C_BasePlayer* localplayer, C_BaseCombatWeapon* activeWeapon)
 {
 	float hitchance = 101;
 	
@@ -615,8 +613,6 @@ static void FixMouseDeltas(CUserCmd* cmd, const QAngle &angle, const QAngle &old
 
 void Ragebot::CreateMove(CUserCmd* cmd)
 {
-	if (!Settings::Ragebot::enabled)
-		return;
 
 	C_BasePlayer* localplayer = (C_BasePlayer*) entityList->GetClientEntity(engine->GetLocalPlayer());
 	

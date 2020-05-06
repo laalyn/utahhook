@@ -1,15 +1,18 @@
+#pragma once
+
 #include "SDK.h"
 #include "vector.h"
 
 
 namespace matrix
 {
-    static void MatrixGetColumn(const matrix3x4_t &src, int nCol, Vector& pColumn);
-    static void MatrixMultiply( const matrix3x4_t& src1, const matrix3x4_t& src2, matrix3x4_t& dst );
-	static void MatrixSetColumn(const Vector &in, int column, matrix3x4_t& out);
-	static void MatrixMultiply(matrix3x4_t& in1, const matrix3x4_t& in2);
-	static void MatrixCopy(const matrix3x4_t& source, matrix3x4_t& target);
+    inline void MatrixGetColumn(const matrix3x4_t &src, int nCol, Vector& pColumn);
+    inline void MatrixMultiply( const matrix3x4_t& src1, const matrix3x4_t& src2, matrix3x4_t& dst );
+	inline void MatrixSetColumn(const Vector &in, int column, matrix3x4_t& out);
+	inline void MatrixMultiply(matrix3x4_t& in1, const matrix3x4_t& in2);
+	inline void MatrixCopy(const matrix3x4_t& source, matrix3x4_t& target);
 }
+
 void matrix::MatrixGetColumn(const matrix3x4_t &src, int nCol, Vector& pColumn)
 {
     pColumn.x = src[0][nCol];
@@ -68,11 +71,6 @@ void matrix::MatrixMultiply(matrix3x4_t& in1, const matrix3x4_t& in2)
     
     in1 = out;
 }
-
-// inline void MatrixMultiply ( const matrix3x4_t &in1, const matrix3x4_t &in2, matrix3x4_t &out )
-// {
-// 	ConcatTransforms( in1, in2, out );
-// }
 
 void matrix::MatrixCopy(const matrix3x4_t& source, matrix3x4_t& target)
 {

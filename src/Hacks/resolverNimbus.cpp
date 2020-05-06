@@ -8,7 +8,7 @@
 #include "antiaim.h"
 
 std::vector<int64_t> ResolverNimbus::Players = {};
-std::vector<std::pair<C_BasePlayer *, QAngle>> player_data_nimbus;
+std::vector<std::pair<C_BasePlayer *, QAngle>> player_data_Nimbus;
 
 static float NormalizeAsYaw(float flAngle)
 {
@@ -51,10 +51,10 @@ void ResolverNimbus::FrameStageNotify(ClientFrameStage_t stage)
 			IEngineClient::player_info_t entityInformation;
 			engine->GetPlayerInfo(i, &entityInformation);
 
-			if (Entity::IsTeamMate(player, localplayer))
+			if (!Settings::Resolver::resolverNumbus && std::find(ResolverNimbus::Players.begin(), ResolverNimbus::Players.end(), entityInformation.xuid) == ResolverNimbus::Players.end())
 				continue;
 
-			player_data_nimbus.push_back(std::pair<C_BasePlayer *, QAngle>(player, *player->GetEyeAngles()));
+			player_data_Nimbus.push_back(std::pair<C_BasePlayer *, QAngle>(player, *player->GetEyeAngles()));
 
 			/*
 			cvar->ConsoleColorPrintf(ColorRGBA(64, 0, 255, 255), XORSTR("\n[Nimbus] "));
@@ -67,18 +67,36 @@ void ResolverNimbus::FrameStageNotify(ClientFrameStage_t stage)
 			if (lbyDelta < 35)
 				return;
 
-			player->GetEyeAngles()->y += *player->GetLowerBodyYawTarget();
+			if (true)
+			{
+				static float trueDelta = NormalizeAsYaw(*player->GetLowerBodyYawTarget() - player->GetEyeAngles()->y);
+
+				if (player->GetVelocity().Length() < 10.0f)
+				{
+					player->GetAnimState()->goalFeetYaw = trueDelta <= 0
+															  ? player->GetEyeAngles()->y + fabs(AntiAim::GetMaxDelta(player->GetAnimState()) * 0.99f)
+															  : fabs(-AntiAim::GetMaxDelta(player->GetAnimState()) * 0.99f) - player->GetEyeAngles()->y;
+				}
+				else
+				{
+					player->GetAnimState()->goalFeetYaw = trueDelta <= 0
+															  ? player->GetEyeAngles()->y + fabs(AntiAim::GetMaxDelta(player->GetAnimState()) * 0.2f)
+															  : fabs(-AntiAim::GetMaxDelta(player->GetAnimState()) * 0.2f) - player->GetEyeAngles()->y;
+				}
+			}
+			else
+				player->GetEyeAngles()->y += *player->GetLowerBodyYawTarget();
 		}
 	}
 	else if (stage == ClientFrameStage_t::FRAME_RENDER_END)
 	{
-		for (unsigned long i = 0; i < player_data_nimbus.size(); i++)
+		for (unsigned long i = 0; i < player_data_Nimbus.size(); i++)
 		{
-			std::pair<C_BasePlayer *, QAngle> player_aa_data = player_data_nimbus[i];
+			std::pair<C_BasePlayer *, QAngle> player_aa_data = player_data_Nimbus[i];
 			*player_aa_data.first->GetEyeAngles() = player_aa_data.second;
 		}
 
-		player_data_nimbus.clear();
+		player_data_Nimbus.clear();
 	}
 }
 

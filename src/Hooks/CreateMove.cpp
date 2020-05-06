@@ -1,4 +1,5 @@
 #include "hooks.h"
+#include <future>
 
 #include "../interfaces.h"
 #include "../settings.h"
@@ -56,9 +57,14 @@ bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
 		NoFall::PrePredictionCreateMove(cmd);
 
 		PredictionSystem::StartPrediction(cmd);
-			Legitbot::CreateMove(cmd);
-			Ragebot::CreateMove(cmd);
-			Triggerbot::CreateMove(cmd);
+			if(Settings::Legitbot::enabled)
+			{
+				Legitbot::CreateMove(cmd);
+			}
+			else if( Settings::Ragebot::enabled)
+			{
+				std::async(std::launch::async, Ragebot::CreateMove, cmd);
+			}
 			AutoKnife::CreateMove(cmd);
             AntiAim::CreateMove(cmd);
 			FakeLag::CreateMove(cmd);
