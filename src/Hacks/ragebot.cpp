@@ -173,8 +173,7 @@ static Vector VelocityExtrapolate(C_BasePlayer* player, Vector aimPos)
 
 static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, float* bestDamage, AimTargetType aimTargetType = AimTargetType::FOV)
 {
-
-    static C_BasePlayer* lockedOn = nullptr;
+	
     C_BasePlayer* localplayer = (C_BasePlayer*)entityList->GetClientEntity(engine->GetLocalPlayer());
     C_BasePlayer* closestEntity = nullptr;
 
@@ -599,7 +598,7 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 	{
 	    RagebotShouldAim = true;
 	}
-	if (cmd->buttons & IN_ATTACK)
+	else if (cmd->buttons & IN_ATTACK)
 	{
 	    RagebotShouldAim = true;
 	}
@@ -609,20 +608,20 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 	{
 	    if (Settings::Ragebot::Prediction::enabled)
 	    {
-		localEye = VelocityExtrapolate(localplayer, localEye); // get eye pos next tick
-		bestSpot = VelocityExtrapolate(player, bestSpot); // get target pos next tick
+			localEye = VelocityExtrapolate(localplayer, localEye); // get eye pos next tick
+			bestSpot = VelocityExtrapolate(player, bestSpot); // get target pos next tick
 	    }
 	    angle = Math::CalcAngle(localEye, bestSpot);
 	}
     }
     else if (EnemyPresent) // Just Increase the probrability of scoping for faster shooting in some cases
     {
-	EnemyPresent = !EnemyPresent;
-	if (Settings::Ragebot::AutoShoot::autoscope && Util::Items::IsScopeable(*activeWeapon->GetItemDefinitionIndex()) && !localplayer->IsScoped() && !(cmd->buttons & IN_ATTACK2))
-	{
-	    cmd->buttons |= IN_ATTACK2;
-	    return;
-	}
+		EnemyPresent = !EnemyPresent;
+		if (Settings::Ragebot::AutoShoot::autoscope && Util::Items::IsScopeable(*activeWeapon->GetItemDefinitionIndex()) && !localplayer->IsScoped() && !(cmd->buttons & IN_ATTACK2))
+		{
+	    	cmd->buttons |= IN_ATTACK2;
+	    	return;
+		}
 	Settings::Debug::AutoAim::target = { 0, 0, 0 };
 	RagebotShouldAim = false;
     }
@@ -649,7 +648,7 @@ void Ragebot::CreateMove(CUserCmd* cmd)
     Math::CorrectMovement(oldAngle, cmd, oldForward, oldSideMove);
 
     if (!Settings::Ragebot::silent)
-	engine->SetViewAngles(cmd->viewangles);
+		engine->SetViewAngles(cmd->viewangles);
 }
 
 void Ragebot::FireGameEvent(IGameEvent* event)

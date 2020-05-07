@@ -4,6 +4,8 @@
 #include "../settings.h"
 #include "../interfaces.h"
 
+static bool buttonToggle = false;
+
 void ThirdPerson::OverrideView(CViewSetup *pSetup)
 {
 	C_BasePlayer* localplayer = (C_BasePlayer*) entityList->GetClientEntity(engine->GetLocalPlayer());
@@ -21,8 +23,25 @@ void ThirdPerson::OverrideView(CViewSetup *pSetup)
 
 	if(localplayer->GetAlive() && Settings::ThirdPerson::enabled && !engine->IsTakingScreenshot())
 	{
-		if (inputSystem->IsButtonDown(Settings::ThirdPerson::toggleThirdPerson))
+		/* Code For Toggle
+			if (inputSystem->IsButtonDown(Settings::ThirdPerson::toggleThirdPerson) && buttonToggle == false)
+				Settings::ThirdPerson::toggled = true;
+			else if ( !inputSystem->IsButtonDown(Settings::ThirdPerson::toggleThirdPerson ) && Settings::ThirdPerson::toggled == true)
+				Settings::ThirdPerson::toggled = false;
+		*/
+
+		/*
+		* Button Toggel Code :)
+		*/
+		if ( inputSystem->IsButtonDown(Settings::ThirdPerson::toggleThirdPerson) && buttonToggle == false )
+		{
+			buttonToggle = true;
 			Settings::ThirdPerson::toggled = !Settings::ThirdPerson::toggled;
+		}
+		else if ( !inputSystem->IsButtonDown(Settings::ThirdPerson::toggleThirdPerson ) && buttonToggle == true)
+			buttonToggle = false;
+		
+		// END
 
 		if (Settings::ThirdPerson::toggled)
 		{
