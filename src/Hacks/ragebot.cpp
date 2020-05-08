@@ -241,14 +241,14 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 
 			if (VisiblityCheck)
 			{
-				if (spotDamage >= playerHelth && VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		VisibleDamage = spotDamage;
 		    		visibleSpot = headPoints[j];
 					prevSpotDamage = 0.f;
 		    		return;
 				}
-				if (spotDamage > 0.f && spotDamage >= minDamageVisible && minDamageVisible >= minDamage && spotDamage > prevSpotDamage)
+				if (spotDamage > 0.f && spotDamage >= minDamageVisible && spotDamage > prevSpotDamage)
 				{
 		    		prevSpotDamage = VisibleDamage = spotDamage;
 		    		visibleSpot = headPoints[j];
@@ -257,7 +257,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			}
 			else 
 			{
-				if (spotDamage >= playerHelth && !VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		wallbangspot = headPoints[j];
 		    		wallbangdamage = spotDamage;
@@ -269,6 +269,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 				{
 		    		prevSpotDamage = wallbangdamage = spotDamage;
 		    		wallbangspot = headPoints[j];
+					return;
 				}
 			}
 			
@@ -297,14 +298,14 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 				
 			if (VisiblityCheck)
 			{
-				if (spotDamage >= playerHelth && VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		VisibleDamage = spotDamage;
 		    		visibleSpot = upperChest[j];
 					prevSpotDamage = 0.f;
 		    		return;
 				}
-				if (spotDamage > 0.f && spotDamage >= minDamageVisible && minDamageVisible >= minDamage && spotDamage > prevSpotDamage)
+				if (spotDamage > 0.f && spotDamage >= minDamageVisible && spotDamage > prevSpotDamage)
 				{
 		    		prevSpotDamage = VisibleDamage = spotDamage;
 		    		visibleSpot = upperChest[j];
@@ -313,7 +314,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			}
 			else 
 			{
-				if (spotDamage >= playerHelth && !VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		wallbangspot = upperChest[j];
 		    		wallbangdamage = spotDamage;
@@ -325,6 +326,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 				{
 		    		prevSpotDamage = wallbangdamage = spotDamage;
 		    		wallbangspot = upperChest[j];
+					return;
 				}
 			}
 			
@@ -351,14 +353,14 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 
 			if (VisiblityCheck)
 			{
-				if (spotDamage >= playerHelth && VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		VisibleDamage = spotDamage;
 		    		visibleSpot = MiddleChest[j];
 					prevSpotDamage = 0.f;
 		    		return;
 				}
-				if (spotDamage > 0.f && spotDamage >= minDamageVisible && minDamageVisible >= minDamage && spotDamage > prevSpotDamage)
+				if (spotDamage > 0.f && spotDamage >= minDamageVisible && spotDamage > prevSpotDamage)
 				{
 		    		prevSpotDamage = VisibleDamage = spotDamage;
 		    		visibleSpot = MiddleChest[j];
@@ -379,6 +381,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 				{
 		    		prevSpotDamage = wallbangdamage = spotDamage;
 		    		wallbangspot = MiddleChest[j];
+					return;
 				}
 			}
 	    }
@@ -404,14 +407,14 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 
 			if (VisiblityCheck)
 			{
-				if (spotDamage >= playerHelth && VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		VisibleDamage = spotDamage;
 		    		visibleSpot = LowerChest[j];
 					prevSpotDamage = 0.f;
 		    		return;
 				}
-				if (spotDamage > 0.f && spotDamage >= minDamageVisible && minDamageVisible >= minDamage && spotDamage > prevSpotDamage)
+				if (spotDamage > 0.f && spotDamage >= minDamageVisible  && spotDamage > prevSpotDamage)
 				{
 		    		prevSpotDamage = VisibleDamage = spotDamage;
 		    		visibleSpot = LowerChest[j];
@@ -432,6 +435,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 				{
 		    		prevSpotDamage = wallbangdamage = spotDamage;
 		    		wallbangspot = LowerChest[j];
+					return;
 				}
 			}
 			
@@ -460,11 +464,10 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 				prevSpotDamage = 0.f;
 				return;
 			}
-			if ( boneDamage >= minDamageVisible && minDamageVisible >= minDamageVisible && boneDamage > prevSpotDamage)
+			if ( boneDamage >= minDamageVisible && boneDamage > prevSpotDamage && boneDamage > prevSpotDamage)
 	    	{
 				visibleSpot = bone3D;
 				prevSpotDamage = VisibleDamage = boneDamage;
-				return;
 	    	}
 		}
 		else 
@@ -549,14 +552,14 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 
 			if ( VisiblityCheck ) // cheking if the enemy  is visible
 			{
-				if (spotDamage >= playerHelth && VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		VisibleDamage = spotDamage;
 		    		visibleSpot = headPoints[j];
 		    		prevSpotDamage = 0;
 		    		return;
 				}
-				if (spotDamage > 0.f && spotDamage >= minDamage)
+				if (spotDamage > 0.f && spotDamage >= minDamageVisible && spotDamage > prevSpotDamage)
 				{
 		    		prevSpotDamage = wallbangdamage = spotDamage;
 		    		wallbangspot = headPoints[j];
@@ -564,14 +567,14 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 			}
 			else
 			{
-				if (spotDamage >= playerHelth && !VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		wallbangspot = headPoints[j];
 		    		wallbangdamage = spotDamage;
 		    		prevSpotDamage = 0;
 		    		return;
 				}
-				if (spotDamage > 0.f && spotDamage >= minDamageVisible)
+				if (spotDamage > 0.f && spotDamage >= minDamage && spotDamage > prevSpotDamage)
 				{
 		    		prevSpotDamage = VisibleDamage = spotDamage;
 		    		visibleSpot = headPoints[j];
@@ -604,14 +607,14 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 
 			if ( VisiblityCheck ) // cheking if the enemy  is visible
 			{
-				if (spotDamage >= playerHelth && VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		VisibleDamage = spotDamage;
 		    		visibleSpot = upperChest[j];
 		    		prevSpotDamage = 0;
 		    		return;
 				}
-				if (spotDamage > 0.f && spotDamage >= minDamage)
+				if (spotDamage > 0.f && spotDamage >= minDamageVisible && spotDamage > prevSpotDamage)
 				{
 		    		prevSpotDamage = wallbangdamage = spotDamage;
 		    		wallbangspot = upperChest[j];
@@ -619,14 +622,14 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 			}
 			else
 			{
-				if (spotDamage >= playerHelth && !VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		wallbangspot = upperChest[j];
 		    		wallbangdamage = spotDamage;
 		    		prevSpotDamage = 0;
 		    		return;
 				}
-				if (spotDamage > 0.f && spotDamage >= minDamageVisible)
+				if (spotDamage > 0.f && spotDamage >= minDamage && spotDamage > prevSpotDamage)
 				{
 		    		prevSpotDamage = VisibleDamage = spotDamage;
 		    		visibleSpot = upperChest[j];
@@ -657,14 +660,14 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 
 			if ( VisiblityCheck ) // cheking if the enemy  is visible
 			{
-				if (spotDamage >= playerHelth && VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		VisibleDamage = spotDamage;
 		    		visibleSpot = MiddleChest[j];
 		    		prevSpotDamage = 0;
 		    		return;
 				}
-				if (spotDamage > 0.f && spotDamage >= minDamage)
+				if (spotDamage > 0.f && spotDamage >= minDamageVisible && spotDamage > prevSpotDamage)
 				{
 		    		prevSpotDamage = wallbangdamage = spotDamage;
 		    		wallbangspot = MiddleChest[j];
@@ -672,14 +675,14 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 			}
 			else
 			{
-				if (spotDamage >= playerHelth && !VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		wallbangspot = MiddleChest[j];
 		    		wallbangdamage = spotDamage;
 		    		prevSpotDamage = 0;
 		    		return;
 				}
-				if (spotDamage > 0.f && spotDamage >= minDamageVisible)
+				if (spotDamage > 0.f && spotDamage >= minDamage && spotDamage > prevSpotDamage)
 				{
 		    		prevSpotDamage = VisibleDamage = spotDamage;
 		    		visibleSpot = MiddleChest[j];
@@ -710,14 +713,14 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 
 			if ( VisiblityCheck ) // cheking if the enemy  is visible
 			{
-				if (spotDamage >= playerHelth && VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		VisibleDamage = spotDamage;
 		    		visibleSpot = LowerChest[j];
 		    		prevSpotDamage = 0;
 		    		return;
 				}
-				if (spotDamage > 0.f && spotDamage >= minDamage)
+				if (spotDamage > 0.f && spotDamage >= minDamageVisible && spotDamage > prevSpotDamage)
 				{
 		    		prevSpotDamage = wallbangdamage = spotDamage;
 		    		wallbangspot = LowerChest[j];
@@ -725,14 +728,14 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 			}
 			else
 			{
-				if (spotDamage >= playerHelth && !VisiblityCheck)
+				if (spotDamage >= playerHelth)
 				{
 		    		wallbangspot = LowerChest[j];
 		    		wallbangdamage = spotDamage;
 		    		prevSpotDamage = 0;
 		    		return;
 				}
-				if (spotDamage > 0.f && spotDamage >= minDamageVisible)
+				if (spotDamage > 0.f && spotDamage >= minDamage && spotDamage > prevSpotDamage)
 				{
 		    		prevSpotDamage = VisibleDamage = spotDamage;
 		    		visibleSpot = LowerChest[j];
@@ -767,7 +770,7 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 				prevSpotDamage = 0.f;
 				return;
 			}
-			if (boneDamage > prevSpotDamage && boneDamage >= minDamageVisible)
+			if (boneDamage > prevSpotDamage && boneDamage >= minDamageVisible && boneDamage > 0.f)
 	    	{
 				visibleSpot = bone3D;
 				prevSpotDamage = VisibleDamage = boneDamage;
@@ -782,7 +785,7 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 				prevSpotDamage = 0.f;
 				return;
 			}
-			if (boneDamage > prevSpotDamage && boneDamage >= minDamage)
+			if (boneDamage > prevSpotDamage && boneDamage >= minDamage && boneDamage > 0.f)
 			{
 	    		wallbangspot = bone3D;
 	    		prevSpotDamage = wallbangdamage = boneDamage;
@@ -1219,8 +1222,8 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 
     if (!localplayer || !localplayer->GetAlive())
     {
-	RagebotShouldAim = false;
-	return;
+		RagebotShouldAim = false;
+		return;
     }
 
     Ragebot::UpdateValues();
@@ -1253,8 +1256,8 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 	    //cheking if the weapon scopable and not scop then it will scop and go back to the next tick
 	    if (Util::Items::IsScopeable(*activeWeapon->GetItemDefinitionIndex()) && !localplayer->IsScoped() && !(cmd->buttons & IN_ATTACK2))
 	    {
-		cmd->buttons |= IN_ATTACK2;
-		return; // will go to the next tick
+			cmd->buttons |= IN_ATTACK2;
+			return; // will go to the next tick
 	    }
 	}
 	if (Settings::Ragebot::AutoShoot::enabled)

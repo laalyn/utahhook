@@ -252,6 +252,7 @@ void Settings::LoadDefaultsOrSave(std::string path)
     settings[XORSTR("AntiAim")][XORSTR("AutoDisable")][XORSTR("no_enemy")] = Settings::AntiAim::AutoDisable::noEnemy;
     settings[XORSTR("AntiAim")][XORSTR("AutoDisable")][XORSTR("knife_held")] = Settings::AntiAim::AutoDisable::knifeHeld;
     settings[XORSTR("AntiAim")][XORSTR("Rage AntiAim")][XORSTR("enabled")] = Settings::AntiAim::RageAntiAim::enable;
+    settings[XORSTR("AntiAim")][XORSTR("ManualAntiAim")][XORSTR("Enable")] = Settings::AntiAim::ManualAntiAim::Enable;
     
     /*
     * legit anti aim settings 
@@ -815,6 +816,7 @@ void Settings::LoadConfig(std::string path)
     GetVal(settings[XORSTR("AntiAim")][XORSTR("AutoDisable")][XORSTR("no_enemy")], &Settings::AntiAim::AutoDisable::noEnemy);
     GetVal(settings[XORSTR("AntiAim")][XORSTR("AutoDisable")][XORSTR("knife_held")], &Settings::AntiAim::AutoDisable::knifeHeld);
     GetVal(settings[XORSTR("AntiAim")][XORSTR("Rage AntiAim")][XORSTR("enabled")], &Settings::AntiAim::RageAntiAim::enable);
+    GetVal(settings[XORSTR("AntiAim")][XORSTR("ManualAntiAim")][XORSTR("Enable")], &Settings::AntiAim::ManualAntiAim::Enable);
     
     /* 
     *Legit Anti AIm Settings Saving
