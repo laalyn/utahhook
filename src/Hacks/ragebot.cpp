@@ -236,10 +236,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			// if ( !( spotDamage >= minDamageVisible >= minDamage) )
 			// 	continue;
 
-			if (spotDamage <= 0.f)
-				continue;
-
-			if ( !EnemyPresent)
+			if ( spotDamage > 0.f && !EnemyPresent)
 		    	EnemyPresent = true;
 
 			if (VisiblityCheck)
@@ -295,10 +292,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			// if ( !( spotDamage >= minDamageVisible >= minDamage) )
 			// 	continue;
 
-			if (spotDamage <= 0.f)
-				continue;
-				
-			if (!EnemyPresent)
+			if ( spotDamage > 0.f && !EnemyPresent)
 		    	EnemyPresent = true;
 				
 			if (VisiblityCheck)
@@ -352,10 +346,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			// if ( !( spotDamage >= minDamageVisible >= minDamage) )
 			// 	continue;
 			
-			if (spotDamage <= 0.f)
-				continue;
-				
-			if ( !EnemyPresent)
+			if ( spotDamage > 0.f && !EnemyPresent)
 		    	EnemyPresent = true;
 
 			if (VisiblityCheck)
@@ -408,10 +399,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			// if ( !( spotDamage >= minDamageVisible >= minDamage) )
 			// 	continue;
 
-			if (spotDamage <= 0.f)
-				continue;
-				
-			if (!EnemyPresent)
+			if ( spotDamage > 0.f && !EnemyPresent)
 		    	EnemyPresent = true;
 
 			if (VisiblityCheck)
@@ -460,11 +448,8 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 		// if ( !( boneDamage >= minDamageVisible >= minDamage) )
 		// 		continue;
 
-		if (boneDamage <= 0.f)
-				continue;
-				
-		if (!EnemyPresent)
-	   	 	EnemyPresent = true;
+		if ( boneDamage > 0.f && !EnemyPresent)
+		    	EnemyPresent = true;
 
 		if (VisiblityCheck)
 		{
@@ -552,17 +537,14 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 	    {
 			Autowall::FireBulletData data;
 			float spotDamage = Autowall::GetDamage(headPoints[j], !Settings::Ragebot::friendly, data);
-
-			if (spotDamage <= 0.f)
-				continue;
-/*			
+/*
 			if (spotDamage < minDamage && spotDamage < minDamageVisible)
 				continue;
 
 			if (spotDamage <= prevSpotDamage)
 				continue;
 */
-			if ( !EnemyPresent ) 
+			if ( spotDamage > 0.f && !EnemyPresent ) 
 		    	EnemyPresent = true;
 
 			if ( VisiblityCheck ) // cheking if the enemy  is visible
@@ -610,8 +592,6 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 			Autowall::FireBulletData data;
 			float spotDamage = Autowall::GetDamage(upperChest[j], !Settings::Ragebot::friendly, data);
 
-			if (spotDamage <= 0.f)
-				continue;
 /*
 			if (spotDamage < minDamage && spotDamage < minDamageVisible)
 				continue;
@@ -619,7 +599,7 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 			if (spotDamage <= prevSpotDamage)
 				continue;
 */
-			if ( !EnemyPresent )
+			if ( spotDamage > 0.f && !EnemyPresent ) 
 		    	EnemyPresent = true;
 
 			if ( VisiblityCheck ) // cheking if the enemy  is visible
@@ -665,9 +645,6 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 	    {
 			Autowall::FireBulletData data;
 			float spotDamage = Autowall::GetDamage(MiddleChest[j], !Settings::Ragebot::friendly, data);
-
-			if (spotDamage <= 0.f)
-				continue;
 /*
 			if (spotDamage < minDamage && spotDamage < minDamageVisible)
 				continue;
@@ -675,7 +652,7 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 			if (spotDamage <= prevSpotDamage)
 				continue;
 */
-			if ( !EnemyPresent )
+			if ( spotDamage > 0.f && !EnemyPresent ) 
 		    	EnemyPresent = true;
 
 			if ( VisiblityCheck ) // cheking if the enemy  is visible
@@ -721,9 +698,6 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 	    {
 			Autowall::FireBulletData data;
 			float spotDamage = Autowall::GetDamage(LowerChest[j], !Settings::Ragebot::friendly, data);
-
-			if (spotDamage <= 0.f)
-				continue;
 /*
 			if (spotDamage < minDamage && spotDamage < minDamageVisible)
 				continue;
@@ -731,7 +705,7 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 			if (spotDamage <= prevSpotDamage)
 				continue;
 */
-			if ( !EnemyPresent )
+			if ( spotDamage > 0.f && !EnemyPresent ) 
 		    	EnemyPresent = true;
 
 			if ( VisiblityCheck ) // cheking if the enemy  is visible
@@ -774,9 +748,6 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 		Autowall::FireBulletData data;
 		float boneDamage = Autowall::GetDamage(bone3D, !Settings::Ragebot::friendly, data);
 		
-
-		if ( boneDamage <= 0.f)
-			continue;
 /*
 		if (boneDamage < minDamage && boneDamage < minDamageVisible)
 				continue;
@@ -784,8 +755,8 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 		if ( boneDamage > 0.f && boneDamage <= prevSpotDamage)
 			continue;
 		*/
-		if ( !EnemyPresent )
-	   	 	EnemyPresent = true;
+		if ( boneDamage > 0.f && !EnemyPresent ) 
+		    	EnemyPresent = true;
 
 		if (VisiblityCheck)
 		{
