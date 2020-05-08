@@ -34,6 +34,7 @@ static float visibleDamage = 50.f;
 static bool autoSlow = false;
 static bool predEnabled = false;
 static bool scopeControlEnabled = false;
+static DamagePrediction damagePrediction = DamagePrediction::safety;
 
 void UI::ReloadRageWeaponSettings()
 {
@@ -84,8 +85,9 @@ void UI::UpdateRageWeaponSettings()
 			.RagebotautoAimFov = RagebotautoAimValue,
 			.autoWallValue = autoWallValue,
 			.visibleDamage = visibleDamage,
-			.HitChance = HitChange,	
+			.HitChance = HitChange,
 			.HitchanceOverwrriteValue = HitchanceOverwriteValue,
+			
 	};
 
 
@@ -112,7 +114,10 @@ void Ragebot::RenderTab()
 	static char filterWeapons[32];
 
 	
+	const char *DamagePredictionType[] = {"Safety","Damage",};
 
+
+	
 	ImGui::Columns(3, nullptr, false);
 	{
 		ImGui::SetColumnOffset(1, 200);
@@ -270,6 +275,8 @@ void Ragebot::RenderTab()
 					}		
 				ImGui::PopItemWidth();		
 			}
+
+			
 			ImGui::Columns(1);
 			ImGui::Separator();
 			ImGui::Text(XORSTR("Autoshoot"));
@@ -384,6 +391,19 @@ void Ragebot::RenderTab()
 			ImGui::Checkbox(XORSTR("Resolver(Numbus Not Testted)"), &Settings::Resolver::resolverNumbus);
 
 			// End of resolver tab
+
+			// Damage Prediction type
+			ImGui::Separator();
+			ImGui::Text(XORSTR("Damage Prediction Type"));
+			ImGui::Separator();
+
+			ImGui::Columns(1);
+			{
+				ImGui::PushItemWidth(-1);
+				ImGui::Combo(XORSTR("##PredictionSystem"), (int*)&Settings::Ragebot::damagePrediction, DamagePredictionType, IM_ARRAYSIZE(DamagePredictionType) );
+				ImGui::PopItemWidth();
+			}			
+			// END
 			ImGui::Columns(1);
 			ImGui::Separator();
 			if (currentWeapon > ItemDefinitionIndex::INVALID && Settings::Ragebot::weapons.find(currentWeapon) != Settings::Ragebot::weapons.end())

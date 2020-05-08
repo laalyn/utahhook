@@ -13,6 +13,12 @@
 #include "SDK/definitions.h"
 #include "SDK/Materialsystem_config.h"
 
+enum class DamagePrediction : int {
+	safety = 0,
+	damage,
+
+};
+
 enum class DrawingBackend : int {
     SURFACE = 0,
     IMGUI,
@@ -320,7 +326,10 @@ struct RagebotWeapon_t
 			this->HitchanceOverwrriteValue == Ragebotanother.HitchanceOverwrriteValue &&
 			this->HitChance == Ragebotanother.HitChance;
 	}
+
 } const ragedefault{};
+
+
 
 class ColorVar
 {
@@ -603,6 +612,7 @@ namespace Settings
         inline bool silent = false;
         inline bool friendly = false;
 
+		inline DamagePrediction damagePrediction = DamagePrediction::safety;
 		namespace AutoAim
 		{
 			inline bool enabled = false;
