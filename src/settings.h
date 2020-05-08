@@ -731,12 +731,19 @@ namespace Settings
 			inline ButtonCode_t InvertKey = ButtonCode_t::KEY_T;
 			inline bool inverted = false;
 		}
-
+		
+		namespace ManualAntiAim
+		{
+			inline bool Enable = false;
+			inline ButtonCode_t backButton = ButtonCode_t::KEY_X;
+			inline ButtonCode_t RightButton = ButtonCode_t::KEY_C;
+			inline ButtonCode_t LeftButton = ButtonCode_t::KEY_Z;
+		}
         namespace Yaw
         {
             inline bool enabled = false;
             inline AntiAimType_Y typeReal = AntiAimType_Y::NONE;
-            inline AntiAimType_Y typeFake = AntiAimType_Y::NONE;
+            inline AntiAimType_Y typeFake = AntiAimType_Y::MAX_DELTA_LBY_AVOID;
         }
 
         namespace Pitch
@@ -1321,7 +1328,7 @@ namespace Settings
 	{
 		inline bool enabled = false;
 		inline bool toggled = true;
-		inline ButtonCode_t toggleThirdPerson = ButtonCode_t::KEY_CAPSLOCK;
+		inline ButtonCode_t toggleThirdPerson = ButtonCode_t::KEY_LALT;
 		inline float distance = 100.0f;
         inline ShowedAngle type = ShowedAngle::REAL;
 	}

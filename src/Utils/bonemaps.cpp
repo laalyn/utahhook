@@ -159,7 +159,8 @@ const std::unordered_map<int,int> * BoneMaps::GetModelTypeBoneMap(C_BasePlayer* 
     }
 
     studioModel = modelInfo->GetStudioModel( model );
-    if( !studioModel ){
+    if( !studioModel )
+    {
         return &boneMapGeneric;
     }
 
