@@ -58,6 +58,7 @@ void UI::ReloadRageWeaponSettings()
 	autoSlow = Settings::Ragebot::weapons.at(index).autoSlow;
 	predEnabled = Settings::Ragebot::weapons.at(index).predEnabled;
 	scopeControlEnabled = Settings::Ragebot::weapons.at(index).scopeControlEnabled;
+	damagePrediction = Settings::Ragebot::weapons.at(index).DmagePredictionType;
 
 	for (int bone = BONE_PELVIS; bone <= BONE_RIGHT_SOLE; bone++)
 		desiredBones[bone] = Settings::Ragebot::weapons.at(index).desiredBones[bone];
@@ -87,7 +88,7 @@ void UI::UpdateRageWeaponSettings()
 			.visibleDamage = visibleDamage,
 			.HitChance = HitChange,
 			.HitchanceOverwrriteValue = HitchanceOverwriteValue,
-			
+			.DmagePredictionType = damagePrediction,	
 	};
 
 
@@ -400,7 +401,8 @@ void Ragebot::RenderTab()
 			ImGui::Columns(1);
 			{
 				ImGui::PushItemWidth(-1);
-				ImGui::Combo(XORSTR("##PredictionSystem"), (int*)&Settings::Ragebot::damagePrediction, DamagePredictionType, IM_ARRAYSIZE(DamagePredictionType) );
+				if(ImGui::Combo(XORSTR("##PredictionSystem"), (int*)&damagePrediction, DamagePredictionType, IM_ARRAYSIZE(DamagePredictionType) ) )
+					UI::UpdateRageWeaponSettings();
 				ImGui::PopItemWidth();
 			}			
 			// END

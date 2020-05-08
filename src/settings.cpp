@@ -237,6 +237,7 @@ void Settings::LoadDefaultsOrSave(std::string path)
 	RageweaponSetting[XORSTR("AutoSlow")][XORSTR("Enabled")] = i.second.autoSlow;
 	RageweaponSetting[XORSTR("Prediction")][XORSTR("Enabled")] = i.second.predEnabled;
 	RageweaponSetting[XORSTR("ScopeControl")][XORSTR("Enabled")] = i.second.scopeControlEnabled;
+    RageweaponSetting[XORSTR("DamagePrediction")][XORSTR("Type")] = (int)i.second.DmagePredictionType;
 
 	for (int bone = BONE_PELVIS; bone <= BONE_RIGHT_SOLE; bone++)
 	    RageweaponSetting[XORSTR("DesiredBones")][XORSTR("Bones")][bone] = i.second.desiredBones[bone];
@@ -798,7 +799,10 @@ void Settings::LoadConfig(std::string path)
         .visibleDamage = RageweaponSetting[XORSTR("visibleDamage")].asFloat(),
 	    .HitChance = RageweaponSetting[XORSTR("HitChance")][XORSTR("Value")].asFloat(),
         .HitchanceOverwrriteValue = RageweaponSetting[XORSTR("HitChanceOverwrride")][XORSTR("Value")].asFloat(),
+        //.DmagePredictionType = RageweaponSetting[XORSTR("DamagePrediction")][XORSTR("Type")].asUInt(),
 	};
+    // Getting value like this because can't find anyother way convert value from json to enum
+    GetVal(RageweaponSetting[XORSTR("DamagePrediction")][XORSTR("Type")], (int*)&weapon.DmagePredictionType);
 
 	for (int bone = BONE_PELVIS; bone <= BONE_RIGHT_SOLE; bone++)
 	    weapon.desiredBones[bone] = RageweaponSetting[XORSTR("DesiredBones")][XORSTR("Bones")][bone].asBool();

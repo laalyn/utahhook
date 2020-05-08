@@ -299,7 +299,9 @@ struct RagebotWeapon_t
 		  visibleDamage = 50.f,
 		  HitChance = 20.f,
 		  HitchanceOverwrriteValue = 1.f;
+	DamagePrediction DmagePredictionType = DamagePrediction::safety;
 	bool desiredBones[31];
+	
 
 	bool operator == (const RagebotWeapon_t& Ragebotanother) const
 	{
@@ -324,7 +326,8 @@ struct RagebotWeapon_t
 			this->scopeControlEnabled == Ragebotanother.scopeControlEnabled && 
 			this->HitChanceOverwrriteEnable == Ragebotanother.HitChanceOverwrriteEnable &&
 			this->HitchanceOverwrriteValue == Ragebotanother.HitchanceOverwrriteValue &&
-			this->HitChance == Ragebotanother.HitChance;
+			this->HitChance == Ragebotanother.HitChance && 
+			this->DmagePredictionType == Ragebotanother.DmagePredictionType;
 	}
 
 } const ragedefault{};
@@ -617,7 +620,7 @@ namespace Settings
 		{
 			inline bool enabled = false;
             inline float fov = 180.0f;
-            inline bool desiredBones[] = {true, true, true, true, true, true, true, // center mass
+            inline bool desiredBones[] = {true, false, true, true, true, true, true, // center mass
                                           true, true, true, true, true, true, true, // left arm
                                           true, true, true, true, true, true, true, // right arm
                                           true, true, true, true, true, // left leg
@@ -648,26 +651,6 @@ namespace Settings
 		}
 
 		namespace AutoSlow
-		{
-			inline bool enabled = false;
-		}
-
-		namespace IgnoreJump
-		{
-			inline bool enabled = false;
-		}
-
-		namespace IgnoreEnemyJump
-		{
-			inline bool enabled = false;
-		}
-
-		namespace SmokeCheck
-		{
-			inline bool enabled = false;
-		}
-
-		namespace FlashCheck
 		{
 			inline bool enabled = false;
 		}

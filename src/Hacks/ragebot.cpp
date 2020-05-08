@@ -1397,6 +1397,7 @@ void Ragebot::UpdateValues()
     Settings::Ragebot::visibleDamage = currentWeaponSetting.visibleDamage;
     Settings::Ragebot::AutoSlow::enabled = currentWeaponSetting.autoSlow;
     Settings::Ragebot::ScopeControl::enabled = currentWeaponSetting.scopeControlEnabled;
+	Settings::Ragebot::damagePrediction = currentWeaponSetting.DmagePredictionType;
 
     for (int bone = BONE_PELVIS; bone <= BONE_RIGHT_SOLE; bone++)
 	Settings::Ragebot::AutoAim::desiredBones[bone] = currentWeaponSetting.desiredBones[bone];
