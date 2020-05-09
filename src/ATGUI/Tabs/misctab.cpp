@@ -447,6 +447,7 @@ void Misc::RenderTab()
 				UI::KeyBindButton(&Settings::JumpThrow::key);
 				ImGui::Checkbox(XORSTR("Attempt NoFall"), &Settings::NoFall::enabled);
 				ImGui::Checkbox(XORSTR("Ragdoll Gravity"), &Settings::RagdollGravity::enabled);
+				ImGui::Checkbox(XORSTR("Show Spectator list"), &Settings::ShowSpectators::enabled);
 			}
 			ImGui::Columns(1);
 			ImGui::Separator();
