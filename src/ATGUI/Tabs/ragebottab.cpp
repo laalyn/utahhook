@@ -15,7 +15,7 @@ static ItemDefinitionIndex currentWeapon = ItemDefinitionIndex::INVALID;
 static bool silent = false;
 static bool friendly = false;
 static bool closestBone = false;
-static bool desiredBones[] = {true, false, true, true, true, true, true, // center mass
+static bool desiredBones[] = {true, true, true, true, false, true, true, // center mass
 							  true, true, true, true, true, true, true, // left arm
 							  true, true, true, true, true, true, true, // right arm
 							  true, true, true, true, true, // left leg
