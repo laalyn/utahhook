@@ -270,7 +270,7 @@ void Ragebot::RenderTab()
 			ImGui::Columns(1);
 			{
 				ImGui::PushItemWidth(-1);
-					if (ImGui::SliderFloat(XORSTR("##FOV"), &RagebotautoAimValue, 0.f, 180.f), XORSTR("%.f"))
+					if (ImGui::SliderFloat(XORSTR("##FOV"), &RagebotautoAimValue, 0.f, 180.f), XORSTR("%.0f"))
 					{
 						UI::UpdateRageWeaponSettings();
 					}		
@@ -376,9 +376,9 @@ void Ragebot::RenderTab()
 			ImGui::Columns(1);
 			{
 				ImGui::PushItemWidth(-1);
-				if (ImGui::SliderFloat(XORSTR("##VISIBLEDMG"), &visibleDamage, 0, 150, XORSTR("Min Visible Damage: %f")))
+				if (ImGui::SliderFloat(XORSTR("##VISIBLEDMG"), &visibleDamage, 0, 150, XORSTR("Min Visible Damage: %.0f")))
 					UI::UpdateRageWeaponSettings();
-				if (ImGui::SliderFloat(XORSTR("##AUTOWALLDMG"), &autoWallValue, 0, 150, XORSTR("Min Behind Wall Damage: %f")))
+				if (ImGui::SliderFloat(XORSTR("##AUTOWALLDMG"), &autoWallValue, 0, 150, XORSTR("Min Behind Wall Damage: %.0f")))
 					UI::UpdateRageWeaponSettings();
 				ImGui::PopItemWidth();
 			}
