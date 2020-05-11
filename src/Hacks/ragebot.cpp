@@ -9,6 +9,8 @@
 #include "../interfaces.h"
 #include "../settings.h"
 
+#include <future>
+
 std::vector<int64_t> Ragebot::friends = {};
 std::vector<long> RagebotkillTimes = { 0 }; // the Epoch time from when we kill someone
 
@@ -21,9 +23,9 @@ static float prevSpotDamage = 0.f;
 static bool HeadMultiPoint(C_BasePlayer* player, Vector points[], matrix3x4_t boneMatrix[])
 {
 
-	matrix3x4_t Matrix[128];
+	matrix3x4_t Matrix[256];
 
-	if (!player->SetupBones(Matrix, 128, 0x100, 0.f))
+	if (!player->SetupBones(Matrix, 256, 0x100, 0.f))
 		return false;
 
 	model_t* pModel = player->GetModel();
@@ -71,10 +73,10 @@ static bool HeadMultiPoint(C_BasePlayer* player, Vector points[], matrix3x4_t bo
 
 static bool UpperChestMultiPoint(C_BasePlayer* player, Vector points[], matrix3x4_t boneMatrix[])
 {
-    // matrix3x4_t boneMatrix[128];
+    matrix3x4_t Matrix[256];
 
-	// if (!player->SetupBones(boneMatrix, 128, 0x100, 0.f))
-	// 	return false;
+	if (!player->SetupBones(Matrix, 256, 0x100, 0.f))
+		return false;
 
 	model_t* pModel = player->GetModel();
     if (!pModel)
@@ -89,8 +91,8 @@ static bool UpperChestMultiPoint(C_BasePlayer* player, Vector points[], matrix3x
 		return false;
 
     Vector mins, maxs;
-    Math::VectorTransform(bbox->bbmin, boneMatrix[bbox->bone], mins);
-    Math::VectorTransform(bbox->bbmax, boneMatrix[bbox->bone], maxs);
+    Math::VectorTransform(bbox->bbmin, Matrix[bbox->bone], mins);
+    Math::VectorTransform(bbox->bbmax, Matrix[bbox->bone], maxs);
 
     Vector center = (mins + maxs) * 0.5f;
 
@@ -113,10 +115,10 @@ static bool UpperChestMultiPoint(C_BasePlayer* player, Vector points[], matrix3x
 static bool ChestMultiPoint(C_BasePlayer* player, Vector points[], matrix3x4_t boneMatrix[])
 {
 
-	// matrix3x4_t boneMatrix[128];
+	matrix3x4_t Matrix[256];
 
-	// if (!player->SetupBones(boneMatrix, 128, 0x100, 0.f))
-	// 	return false;
+	if (!player->SetupBones(Matrix, 256, 0x100, 0.f))
+		return false;
 
     model_t* pModel = player->GetModel();
     if (!pModel)
@@ -131,8 +133,8 @@ static bool ChestMultiPoint(C_BasePlayer* player, Vector points[], matrix3x4_t b
 		return false;
 
     Vector mins, maxs;
-    Math::VectorTransform(bbox->bbmin, boneMatrix[bbox->bone], mins);
-    Math::VectorTransform(bbox->bbmax, boneMatrix[bbox->bone], maxs);
+    Math::VectorTransform(bbox->bbmin, Matrix[bbox->bone], mins);
+    Math::VectorTransform(bbox->bbmax, Matrix[bbox->bone], maxs);
 
     Vector center = (mins + maxs) * 0.5f;
 
@@ -162,10 +164,10 @@ static bool ChestMultiPoint(C_BasePlayer* player, Vector points[], matrix3x4_t b
 
 static bool LowerChestMultiPoint(C_BasePlayer* player, Vector points[], matrix3x4_t boneMatrix[])
 {
-	// matrix3x4_t boneMatrix[128];
+	matrix3x4_t Matrix[256];
 
-	// if (!player->SetupBones(boneMatrix, 128, 0x100, 0.f))
-	// 	return false;
+	if (!player->SetupBones(Matrix, 256, 0x100, 0))
+		return false;
 
     model_t* pModel = player->GetModel();
     if (!pModel)
@@ -180,8 +182,8 @@ static bool LowerChestMultiPoint(C_BasePlayer* player, Vector points[], matrix3x
 		return false;
 
     Vector mins, maxs;
-    Math::VectorTransform(bbox->bbmin, boneMatrix[bbox->bone], mins);
-    Math::VectorTransform(bbox->bbmax, boneMatrix[bbox->bone], maxs);
+    Math::VectorTransform(bbox->bbmin, Matrix[bbox->bone], mins);
+    Math::VectorTransform(bbox->bbmax, Matrix[bbox->bone], maxs);
 
     Vector center = (mins + maxs) * 0.5f;
 
@@ -214,51 +216,55 @@ static bool LowerChestMultiPoint(C_BasePlayer* player, Vector points[], matrix3x
 ** Method for safety damage prediction where 
 ** It will just look for required Damage Not for the best damage
 */
-static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& wallbangdamage, Vector &visibleSpot, float& VisibleDamage)
+static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* wallbangdamage, Vector *visibleSpot, float* VisibleDamage, int i)
 {
 
 	static float minDamage = Settings::Ragebot::AutoWall::value;
     static float minDamageVisible = Settings::Ragebot::visibleDamage;
     const std::unordered_map<int, int>* modelType = BoneMaps::GetModelTypeBoneMap(player);	
 	
-	static int len = sizeof(Settings::Ragebot::AutoAim::desiredBones) / sizeof(Settings::Ragebot::AutoAim::desiredBones[0]);
+	// static int len = sizeof(Settings::Ragebot::AutoAim::desiredBones) / sizeof(Settings::Ragebot::AutoAim::desiredBones[0]);
 
     float FOV = Settings::Ragebot::AutoAim::fov;
 
 	float playerHelth = player->GetHealth();
 
-	matrix3x4_t boneMatrix[128];
+	matrix3x4_t boneMatrix[256];
 
-	if (!player->SetupBones(boneMatrix, 128, 0x100, 0.f))
+	if (!player->SetupBones(boneMatrix, 256, 256, 0.f))
 		return;
 
-	for (int i = 0; i < len; i++)
-    {
+	// for (int i = 0; i < len; i++)
+    // {
 		if (!Settings::Ragebot::AutoAim::desiredBones[i])
-	    	continue;
+	    	return;
 
 		int boneID = (*modelType).at(i);
 
 		if (boneID == BONE_INVALID) // bone not available on this modeltype.
-	   		continue;
+	   		return;
 
 		bool VisiblityCheck = Entity::IsVisible(player, boneID, FOV, false);
 		
 
 		// If we found head here
-		if (i == BONE_HEAD) // head multipoint
+		if (i == CONST_BONE_HEAD) // head multipoint
 		{
 	    	Vector headPoints[HeadMultiVectors];
 	    	if (!HeadMultiPoint(player, headPoints, boneMatrix))
-				continue;
+				return;
 
 	    	// cheaking for all head vectors
 	    	for (int j = 0; j < HeadMultiVectors; j++)
 	    	{
 				Autowall::FireBulletData data;
 				float spotDamage = Autowall::GetDamage(headPoints[j], !Settings::Ragebot::friendly, data);
-				cvar->ConsoleDPrintf(XORSTR("Spot Damage : %d\n find head : %d\n"), spotDamage, i);
-				cvar->ConsoleDPrintf(XORSTR("Returning damage : %d\n"), Autowall::GetDamage(headPoints[j], !Settings::Ragebot::friendly, data) );
+				
+				if (spotDamage <= 0.f )
+					continue;
+
+				if ( (spotDamage < minDamage && spotDamage < minDamageVisible) )
+					continue;
 
 				if ( spotDamage > 0.f && !EnemyPresent)
 		    		EnemyPresent = true;
@@ -267,14 +273,14 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 				{
 					if (spotDamage >= playerHelth)
 					{
-		    			VisibleDamage = spotDamage;
-		    			visibleSpot = headPoints[j];
+		    			*VisibleDamage = spotDamage;
+		    			*visibleSpot = headPoints[j];
 		    			return;
 					}
 					if (spotDamage > 0.f && spotDamage >= minDamageVisible)
 					{
-		    			VisibleDamage = spotDamage;
-		    			visibleSpot = headPoints[j];
+		    			*VisibleDamage = spotDamage;
+		    			*visibleSpot = headPoints[j];
 						return;
 					}
 				}
@@ -282,36 +288,40 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 				{
 					if (spotDamage >= playerHelth)
 					{
-		    			wallbangspot = headPoints[j];
-		    			wallbangdamage = spotDamage;
+		    			*wallbangspot = headPoints[j];
+		    			*wallbangdamage = spotDamage;
 						prevSpotDamage = 0.f;
 		    			return;
 					}
 
 					if (spotDamage > 0.f && spotDamage >= minDamage)
 					{
-		    			prevSpotDamage = wallbangdamage = spotDamage;
-		    			wallbangspot = headPoints[j];
+		    			prevSpotDamage = *wallbangdamage = spotDamage;
+		    			*wallbangspot = headPoints[j];
 						return;
 					}
 				}		
 	    	}
 		}
 	
-	else if (i == BONE_UPPER_SPINAL_COLUMN) // upper chest MultiPoint
+	else if (i == CONST_BONE_UPPER_SPINE) // upper chest MultiPoint
 	{
 	    Vector upperChest[MultiVectors];
 	    if (!UpperChestMultiPoint(player, upperChest, boneMatrix))
-			continue;
+			return;
 
+		
 	    // cheaking for all upper Chest vectors
 	    for (int j = 0; j < MultiVectors; j++)
 	    {
 			Autowall::FireBulletData data;
 			float spotDamage = Autowall::GetDamage(upperChest[j], !Settings::Ragebot::friendly, data);
 
-			// if ( !( spotDamage >= minDamageVisible >= minDamage) )
-			// 	continue;
+			if (spotDamage <= 0.f )
+				continue;
+
+			if ( (spotDamage < minDamage && spotDamage < minDamageVisible) )
+				continue;
 
 			if ( spotDamage > 0.f && !EnemyPresent)
 		    	EnemyPresent = true;
@@ -320,15 +330,15 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			{
 				if (spotDamage >= playerHelth)
 				{
-		    		VisibleDamage = spotDamage;
-		    		visibleSpot = upperChest[j];
+		    		*VisibleDamage = spotDamage;
+		    		*visibleSpot = upperChest[j];
 					prevSpotDamage = 0.f;
 		    		return;
 				}
 				if (spotDamage > 0.f && spotDamage >= minDamageVisible)
 				{
-		    		VisibleDamage = spotDamage;
-		    		visibleSpot = upperChest[j];
+		    		*VisibleDamage = spotDamage;
+		    		*visibleSpot = upperChest[j];
 					return;
 				}
 
@@ -337,16 +347,16 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			{
 				if (spotDamage >= playerHelth)
 				{
-		    		wallbangspot = upperChest[j];
-		    		wallbangdamage = spotDamage;
+		    		*wallbangspot = upperChest[j];
+		    		*wallbangdamage = spotDamage;
 					prevSpotDamage = 0.f;
 		    		return;
 				}
 
 				if (spotDamage > 0.f && spotDamage >= minDamage)
 				{
-		    		wallbangdamage = spotDamage;
-		    		wallbangspot = upperChest[j];
+		    		*wallbangdamage = spotDamage;
+		    		*wallbangspot = upperChest[j];
 					return;
 				}
 			}
@@ -354,11 +364,11 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 	    }
 	}
 	
-	else if (i == BONE_MIDDLE_SPINAL_COLUMN) // Chest Multipoint
+	else if (i == CONST_BONE_MIDDLE_SPINE) // Chest Multipoint
 	{
 	    Vector MiddleChest[MultiVectors];
 	    if (!ChestMultiPoint(player, MiddleChest, boneMatrix))
-		continue;
+			return;
 
 	    // cheaking for all head vectors
 	    for (int j = 0; j < MultiVectors; j++)
@@ -366,6 +376,11 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			Autowall::FireBulletData data;
 			float spotDamage = Autowall::GetDamage(MiddleChest[j], !Settings::Ragebot::friendly, data);
 
+			if (spotDamage <= 0.f )
+				continue;
+
+			if ( (spotDamage < minDamage && spotDamage < minDamageVisible) )
+				continue;
 			// if ( !( spotDamage >= minDamageVisible >= minDamage) )
 			// 	continue;
 			
@@ -376,15 +391,15 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			{
 				if (spotDamage >= playerHelth)
 				{
-		    		VisibleDamage = spotDamage;
-		    		visibleSpot = MiddleChest[j];
+		    		*VisibleDamage = spotDamage;
+		    		*visibleSpot = MiddleChest[j];
 					prevSpotDamage = 0.f;
 		    		return;
 				}
 				if (spotDamage > 0.f && spotDamage >= minDamageVisible)
 				{
-		    		prevSpotDamage = VisibleDamage = spotDamage;
-		    		visibleSpot = MiddleChest[j];
+		    		prevSpotDamage = *VisibleDamage = spotDamage;
+		    		*visibleSpot = MiddleChest[j];
 					return;
 				}
 
@@ -393,27 +408,27 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			{
 				if (spotDamage >= playerHelth && !VisiblityCheck)
 				{
-		    		wallbangspot = MiddleChest[j];
-		    		wallbangdamage = spotDamage;
+		    		*wallbangspot = MiddleChest[j];
+		    		*wallbangdamage = spotDamage;
 					prevSpotDamage = 0.f;
 		    		return;
 				}
 
 				if (spotDamage > 0.f && spotDamage >= minDamage)
 				{
-		    		wallbangdamage = spotDamage;
-		    		wallbangspot = MiddleChest[j];
+		    		*wallbangdamage = spotDamage;
+		    		*wallbangspot = MiddleChest[j];
 					return;
 				}
 			}
 	    }
 	}
 	
-	else if (i == BONE_LOWER_SPINAL_COLUMN) // Lower multipoint
+	else if (i == CONST_BONE_LOWER_SPINE) // Lower multipoint
 	{
 	    Vector LowerChest[MultiVectors];
 	    if (!LowerChestMultiPoint(player, LowerChest, boneMatrix))
-			continue;
+			return;
 
 	    // cheaking for all head vectors
 	    for (int j = 0; j < MultiVectors; j++)
@@ -421,6 +436,12 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			Autowall::FireBulletData data;
 			float spotDamage = Autowall::GetDamage(LowerChest[j], !Settings::Ragebot::friendly, data);
 
+
+			if (spotDamage <= 0.f )
+				continue;
+
+			if ( (spotDamage < minDamage && spotDamage < minDamageVisible) )
+				continue;
 			// if ( !( spotDamage >= minDamageVisible >= minDamage) )
 			// 	continue;
 
@@ -431,15 +452,15 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			{
 				if (spotDamage >= playerHelth)
 				{
-		    		VisibleDamage = spotDamage;
-		    		visibleSpot = LowerChest[j];
+		    		*VisibleDamage = spotDamage;
+		    		*visibleSpot = LowerChest[j];
 					prevSpotDamage = 0.f;
 		    		return;
 				}
 				if (spotDamage > 0.f && spotDamage >= minDamageVisible)
 				{
-		    		prevSpotDamage = VisibleDamage = spotDamage;
-		    		visibleSpot = LowerChest[j];
+		    		prevSpotDamage = *VisibleDamage = spotDamage;
+		    		*visibleSpot = LowerChest[j];
 					return;
 				}
 
@@ -448,67 +469,75 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 			{
 				if (spotDamage >= playerHelth && !VisiblityCheck)
 				{
-		    		wallbangspot = LowerChest[j];
-		    		wallbangdamage = spotDamage;
+		    		*wallbangspot = LowerChest[j];
+		    		*wallbangdamage = spotDamage;
 					prevSpotDamage = 0.f;
 		    		return;
 				}
 
 				if (spotDamage > 0.f && spotDamage >= minDamage)
 				{
-		    		prevSpotDamage = wallbangdamage = spotDamage;
-		    		wallbangspot = LowerChest[j];
+		    		prevSpotDamage = *wallbangdamage = spotDamage;
+		    		*wallbangspot = LowerChest[j];
 					return;
 				}
 			}
 			
 	    }
 	}
-
+	
+	else {
 		Vector bone3D = player->GetBonePosition(boneID);
 
+		cvar->ConsoleDPrintf(XORSTR("In Default"));
 		Autowall::FireBulletData data;
-		float boneDamage = Autowall::GetDamage(bone3D, !Settings::Ragebot::friendly, data);
+		float spotDamage = Autowall::GetDamage(bone3D, !Settings::Ragebot::friendly, data);
 
 
-		if ( boneDamage > 0.f && !EnemyPresent)
+		if (spotDamage <= 0.f )
+				return;
+
+		if ( (spotDamage < minDamage && spotDamage < minDamageVisible) )
+				return;
+		if ( spotDamage > 0.f && !EnemyPresent)
 		    	EnemyPresent = true;
 
 		if (VisiblityCheck)
 		{
-			if (boneDamage >= playerHelth)
+			if (spotDamage >= playerHelth)
 			{
-				visibleSpot = bone3D;
-				VisibleDamage = boneDamage;
+				*visibleSpot = bone3D;
+				*VisibleDamage = spotDamage;
 				prevSpotDamage = 0.f;
 				return;
 			}
-			if ( boneDamage >= minDamageVisible)
+			if ( spotDamage >= minDamageVisible)
 	    	{
-				visibleSpot = bone3D;
-				VisibleDamage = boneDamage;
+				*visibleSpot = bone3D;
+				*VisibleDamage = spotDamage;
 				return;
 	    	}
 		}
 		else 
 		{
-			if (boneDamage >= playerHelth)
+			if (spotDamage >= playerHelth)
 			{
-				wallbangspot = bone3D;
-				wallbangdamage = boneDamage;
+				*wallbangspot = bone3D;
+				*wallbangdamage = spotDamage;
 				prevSpotDamage = 0.f;
 				return;
 	    	}
-			if ( boneDamage >= minDamage)
+			if ( spotDamage >= minDamage)
 			{
-	    		wallbangspot = bone3D;
-	    		prevSpotDamage = wallbangdamage = boneDamage;
+	    		*wallbangspot = bone3D;
+	    		prevSpotDamage = *wallbangdamage = spotDamage;
 				return;
 			}
 	    	
 		}
 	
       }
+	// }
 	return;
 }
 
@@ -516,35 +545,33 @@ static void safetyPrediction(C_BasePlayer* player, Vector& wallbangspot, float& 
 ** Method to calculate the best damge
 ** To kill enemy instantly
 */
-static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, float& wallbangdamage, Vector &visibleSpot, float& VisibleDamage)
+static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, float& wallbangdamage, Vector &visibleSpot, float& VisibleDamage, int i)
 {
 
 	static float minDamage = Settings::Ragebot::AutoWall::value;
     static float minDamageVisible = Settings::Ragebot::visibleDamage;
     const std::unordered_map<int, int>* modelType = BoneMaps::GetModelTypeBoneMap(player);	
 	
-	static int len = sizeof(Settings::Ragebot::AutoAim::desiredBones) / sizeof(Settings::Ragebot::AutoAim::desiredBones[0]);
+	
 
     float FOV = Settings::Ragebot::AutoAim::fov;
 
 	float playerHelth = player->GetHealth();
 
-	matrix3x4_t boneMatrix[128];
+	matrix3x4_t boneMatrix[256];
 
-	if (!player->SetupBones(boneMatrix, 128, 0x100, 0.f))
+	if (!player->SetupBones(boneMatrix, 256, 0x100, 0.f))
 		return;
 
-	for (int i = 0; i < len; i++)
-    {
-		if (!Settings::Ragebot::AutoAim::desiredBones[i])
-	   		continue;
+	if (!Settings::Ragebot::AutoAim::desiredBones[i])
+	   	return;
 
-		int boneID = (*modelType).at(i);
+	int boneID = (*modelType).at(i);
 
-		if (boneID == BONE_INVALID) // bone not available on this modeltype.
-	    	continue;
+	if (boneID == BONE_INVALID) // bone not available on this modeltype.
+	    return;
 
-		bool VisiblityCheck = Entity::IsVisible(player, boneID, FOV, false);
+	bool VisiblityCheck = Entity::IsVisible(player, boneID, FOV, false);
 		
 
 	// If we found head here
@@ -552,7 +579,7 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 	{
 	    Vector headPoints[MultiVectors];
 	    if (!HeadMultiPoint(player, headPoints, boneMatrix))
-			continue;
+			return;
 
 	    // cheaking for all head vectors
 	    for (int j = 0; j < MultiVectors; j++)
@@ -608,7 +635,7 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 	{
 	    Vector upperChest[MultiVectors];
 	    if (!UpperChestMultiPoint(player, upperChest, boneMatrix))
-		continue;
+		return;
 
 	    // cheaking for all head vectors
 	    for (int j = 0; j < MultiVectors; j++)
@@ -618,13 +645,7 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 
 			if (spotDamage <= 0.f || (spotDamage < minDamage && spotDamage < minDamageVisible) )
 				continue;
-/*
-			if (spotDamage < minDamage && spotDamage < minDamageVisible)
-				continue;
 
-			if (spotDamage <= prevSpotDamage)
-				continue;
-*/
 			if ( !EnemyPresent ) 
 		    	EnemyPresent = true;
 
@@ -665,7 +686,7 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 	{
 	    Vector MiddleChest[MultiVectors];
 	    if (!ChestMultiPoint(player, MiddleChest, boneMatrix))
-			continue;
+			return;
 
 		for (int j = 0; j < MultiVectors; j++)
 	    {
@@ -718,7 +739,7 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 	{
 	    Vector LowerChest[MultiVectors];
 	    if (!LowerChestMultiPoint(player, LowerChest, boneMatrix))
-			continue;
+			return;
 	    
 		for (int j = 0; j < MultiVectors; j++)
 	    {
@@ -766,14 +787,15 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 			}
 	    }
 	}
-		
+
+	else {	
 		Vector bone3D = player->GetBonePosition(boneID);
 
 		Autowall::FireBulletData data;
 		float boneDamage = Autowall::GetDamage(bone3D, !Settings::Ragebot::friendly, data);
 		
 		if (boneDamage <= 0.f || (boneDamage < minDamage && boneDamage < minDamageVisible) )
-				continue;
+				return;
 
 		if ( !EnemyPresent ) 
 		    	EnemyPresent = true;
@@ -819,19 +841,22 @@ static void BestDamagePrediction(C_BasePlayer* player, Vector& wallbangspot, flo
 */
 static void GetBestSpotAndDamage(C_BasePlayer* player, Vector& wallBangSpot, float& WallbangDamage, Vector& visibleSPot, float& VisibleDamage)
 {
+	static int len = sizeof(Settings::Ragebot::AutoAim::desiredBones) / sizeof(Settings::Ragebot::AutoAim::desiredBones[0]);
 
-	if (Settings::Ragebot::damagePrediction == DamagePrediction::safety)
+	for (int i = 0; i < len; i++)
 	{
-		safetyPrediction(player, wallBangSpot, WallbangDamage, visibleSPot, VisibleDamage);
-		
-		return;
+		if (Settings::Ragebot::damagePrediction == DamagePrediction::safety)
+		{
+			auto temp = std::async(std::launch::async, safetyPrediction, player, &wallBangSpot, &WallbangDamage, &visibleSPot, &VisibleDamage, i);
+			//safetyPrediction(player, &wallBangSpot, &WallbangDamage, &visibleSPot, &VisibleDamage, i);
+		}
+		else if (Settings::Ragebot::damagePrediction == DamagePrediction::damage)
+		{
+			BestDamagePrediction(player, wallBangSpot, WallbangDamage, visibleSPot, VisibleDamage, i);
+			// cvar->ConsoleDPrintf(XORSTR("WallbangDamage : %d \n VisibeDamge : %d\n"), WallbangDamage, VisibleDamage);
+		}
 	}
-	else if (Settings::Ragebot::damagePrediction == DamagePrediction::damage)
-	{
-		BestDamagePrediction(player, wallBangSpot, WallbangDamage, visibleSPot, VisibleDamage);
-		// cvar->ConsoleDPrintf(XORSTR("WallbangDamage : %d \n VisibeDamge : %d\n"), WallbangDamage, VisibleDamage);
-		return;
-	}   
+	   
 }
 
 
@@ -1221,7 +1246,7 @@ static void RagebotAutoShoot(C_BasePlayer* player, C_BaseCombatWeapon* activeWea
 		return;
     }
 
-	cvar->ConsoleDPrintf(XORSTR("WE are now applying auto shoot"));
+	//cvar->ConsoleDPrintf(XORSTR("WE are now applying auto shoot"));
     float nextPrimaryAttack = activeWeapon->GetNextPrimaryAttack();
 
     if (!(*activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_REVOLVER))
@@ -1295,7 +1320,7 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 
     if (player)
     {
-		cvar->ConsoleDPrintf(XORSTR("find a player \n"));
+		//cvar->ConsoleDPrintf(XORSTR("find a player \n"));
 		
 		//Auto Scop Controll system to controll auto scoping every time
 		if (Settings::Ragebot::ScopeControl::enabled)

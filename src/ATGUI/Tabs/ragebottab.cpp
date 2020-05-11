@@ -270,7 +270,7 @@ void Ragebot::RenderTab()
 			ImGui::Columns(1);
 			{
 				ImGui::PushItemWidth(-1);
-					if (ImGui::SliderFloat(XORSTR("##FOV"), &RagebotautoAimValue, 0.f, 180.f))
+					if (ImGui::SliderFloat(XORSTR("##FOV"), &RagebotautoAimValue, 0.f, 180.f), XORSTR("%.f"))
 					{
 						UI::UpdateRageWeaponSettings();
 					}		
