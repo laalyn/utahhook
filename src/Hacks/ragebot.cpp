@@ -216,9 +216,9 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 
     float FOV = Settings::Ragebot::AutoAim::fov;
 
-	matrix3x4_t boneMatrix[256];
+	matrix3x4_t boneMatrix[128];
 
-	if ( !player->SetupBones(boneMatrix, 256, 256, 0) )
+	if ( !player->SetupBones(boneMatrix, 128, 256, 0) )
 		return;
 
 
