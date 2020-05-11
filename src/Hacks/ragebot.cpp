@@ -852,7 +852,8 @@ static void GetBestSpotAndDamage(C_BasePlayer* player, Vector& wallBangSpot, flo
 		}
 		else if (Settings::Ragebot::damagePrediction == DamagePrediction::damage)
 		{
-			BestDamagePrediction(player, wallBangSpot, WallbangDamage, visibleSPot, VisibleDamage, i);
+			auto temp = std::async(std::launch::async, safetyPrediction, player, &wallBangSpot, &WallbangDamage, &visibleSPot, &VisibleDamage, i);
+			//BestDamagePrediction(player, wallBangSpot, WallbangDamage, visibleSPot, VisibleDamage, i);
 			// cvar->ConsoleDPrintf(XORSTR("WallbangDamage : %d \n VisibeDamge : %d\n"), WallbangDamage, VisibleDamage);
 		}
 	}
