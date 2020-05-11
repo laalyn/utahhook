@@ -207,7 +207,7 @@ static bool LowerChestMultiPoint(C_BasePlayer* player, Vector points[], matrix3x
 */
 static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* wallbangdamage, Vector *visibleSpot, float* VisibleDamage, int *i, float *playerHelth)
 {
-	cvar->ConsoleDPrintf("In Safety Prediction Function\n");
+	// cvar->ConsoleDPrintf("In Safety Prediction Function\n");
 	static float minDamage = Settings::Ragebot::AutoWall::value;
     static float minDamageVisible = Settings::Ragebot::visibleDamage;
     const std::unordered_map<int, int>* modelType = BoneMaps::GetModelTypeBoneMap(player);	
@@ -218,7 +218,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 
 	matrix3x4_t boneMatrix[128];
 
-	if ( !player->SetupBones(boneMatrix, 128, 256, 0) )
+	if ( !player->SetupBones(boneMatrix, 128, 0x100, 0) )
 		return;
 
 
@@ -799,7 +799,7 @@ static void GetBestSpotAndDamage(C_BasePlayer* player, Vector& wallBangSpot, flo
 	// For safety mesurements
 	if (Settings::Ragebot::damagePrediction == DamagePrediction::safety)
 	{	
-		cvar->ConsoleDPrintf(XORSTR("doing safety damage\n"));
+		// cvar->ConsoleDPrintf(XORSTR("doing safety damage\n"));
 		for (int i = 0; i < len; i++)
 		{
 				WallBangDamage[i] = VisibleDamage[i] = 0;
@@ -821,7 +821,7 @@ static void GetBestSpotAndDamage(C_BasePlayer* player, Vector& wallBangSpot, flo
 			if ( VisibleDamage[i] <= 0.f && WallBangDamage[i] <= 0.f)
 				continue;
 
-			cvar->ConsoleDPrintf(XORSTR("calculating damages for safety \n") );
+			//cvar->ConsoleDPrintf(XORSTR("calculating damages for safety \n") );
 			if ( VisibleDamage[i] >= playerHelth)
 			{
 				visibleDamage = VisibleDamage[i];
@@ -892,6 +892,43 @@ static Vector VelocityExtrapolate(C_BasePlayer* player, Vector aimPos)
     return aimPos + (player->GetVelocity() * globalVars->interval_per_tick);
 }
 
+
+/*
+* To find the closesnt enemy to reduce the calculation time and increase perdormace
+*/
+
+static C_BasePlayer* GetClosestEnemy (C_BasePlayer *localplayer)
+{
+	C_BasePlayer* closenstEntity = nullptr;
+	
+	static float prevDistance = 0;
+	for (int i = 1; i < engine->GetMaxClients(); ++i)
+    {
+		C_BasePlayer* player = (C_BasePlayer*)entityList->GetClientEntity(i);
+
+		if (!player
+	    	|| player == localplayer
+	    	|| player->GetDormant()
+	    	|| !player->GetAlive()
+	    	|| player->GetImmune())
+	    	continue;
+
+		if (!Settings::Ragebot::friendly && Entity::IsTeamMate(player, localplayer))
+	    	continue;
+		// Vector localPos = localplayer->GetEyePosition();
+		// Vector enemyPos = player->GetAbsOrigin();
+		QAngle ViewAngle = Math::CalcAngle(localplayer->GetAbsOrigin(), player->GetAbsOrigin());
+		// localPos.z = enemyPos.z;
+
+		float distance = ViewAngle.Length();
+		if ( distance > prevDistance )
+		{
+			closenstEntity = player;
+		}
+	}
+
+	return closenstEntity;
+}
 static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, float* bestDamage, AimTargetType aimTargetType = AimTargetType::FOV)
 {
 	
@@ -910,42 +947,33 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 		return localplayer;
 	}
 
-    float bestFov = Settings::Ragebot::AutoAim::fov;
-
-    for (int i = 1; i < engine->GetMaxClients(); ++i)
-    {
-		C_BasePlayer* player = (C_BasePlayer*)entityList->GetClientEntity(i);
-
-		if (!player
-	    	|| player == localplayer
-	    	|| player->GetDormant()
-	    	|| !player->GetAlive()
-	    	|| player->GetImmune())
-	    	continue;
-
-	if (!Settings::Ragebot::friendly && Entity::IsTeamMate(player, localplayer))
-	    continue;
-
+	
+    
 	Vector wallBangSpot = { 0, 0, 0 },
 	       	VisibleSpot = { 0, 0, 0 };
 	float WallBangdamage = 0.f, 
 			VisibleDamage = 0.f;
 
-	// cvar->ConsoleDPrintf(XORSTR("going for have best damage and spots\n"));
+	C_BasePlayer* player = GetClosestEnemy(localplayer);
+	
+	if ( player == nullptr )
+	{
+		cvar->ConsoleDPrintf(XORSTR("returning null mean no enemy \n"));
+		return player;
+	}
+		
 	GetBestSpotAndDamage(player, wallBangSpot, WallBangdamage, VisibleSpot, VisibleDamage);
-	//cvar->ConsoleDPrintf(XORSTR("WallbangDamage : %d \nVisibeDamge : %d \n"), WallBangdamage, VisibleDamage);
-	// cvar->ConsoleDPrintf(XORSTR("end gettings damages and spots\n"));
 
 	C_BaseCombatWeapon* activeWeapon = (C_BaseCombatWeapon*)entityList->GetClientEntityFromHandle(localplayer->GetActiveWeapon());
 
 	float playerHelth = player->GetHealth();
 
-	if ( VisibleDamage <= 0.f && WallBangdamage <= 0.f)
-		continue;
+	// if ( VisibleDamage <= 0.f && WallBangdamage <= 0.f)
+	// 	continue;
 
 	if (Settings::Ragebot::damagePrediction == DamagePrediction::safety)
 	{
-		if (VisibleDamage >= WallBangdamage)
+		if (VisibleDamage > 0.f && VisibleDamage >= WallBangdamage)
 		{
 			if (VisibleDamage >= playerHelth)
 			{
@@ -973,7 +1001,7 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 				return closestEntity;
 
 		}
-		else
+		else if ( WallBangdamage > 0.f && WallBangdamage > VisibleDamage)
 		{
 			if (WallBangdamage >= playerHelth)
 			{
@@ -998,13 +1026,16 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 		    	*bestSpot = wallBangSpot;
 		    	closestEntity = player;
 		    	lastRayEnd = wallBangSpot;
-				return closestEntity;
-			
+				return closestEntity;	
+		}
+		else
+		{
+			return nullptr;
 		}
 				
 	}
 	
-	else // if the damage prediction is best damage
+	else if ( Settings::Ragebot::damagePrediction == DamagePrediction::damage) // if the damage prediction is best damage
 	{
 		if ( VisibleDamage >= WallBangdamage)
 		{
@@ -1047,7 +1078,7 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 			
 		}
 	}
-    }
+    // }
 
 	if ( bestSpot->IsZero() )
 	{

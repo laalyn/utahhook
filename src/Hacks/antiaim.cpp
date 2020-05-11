@@ -11,8 +11,7 @@
 
 
 QAngle AntiAim::LastTickViewAngle;
-QAngle AntiAim::fakeAngle;
-QAngle AntiAim::realAngle;
+
 static bool bSend = true;
 static bool alignBack = false, 
             alignRight = false, 
