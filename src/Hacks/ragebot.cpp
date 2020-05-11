@@ -19,14 +19,14 @@ inline bool RagebotShouldAim = false,
 			doubletap = false,
 			deathDamage = false;
 
-inline int prevWeaponIndex = 0,
+inline int prevWeaponIndex = NULL,
 			DeathBoneIndex = NULL;
 
 const int MultiVectors = 7, HeadMultiVectors = 7;
 
-static float prevSpotDamage = 0.f;
+static float prevSpotDamage = NULL;
 
-inline Vector DoubleTapSpot = Vector{0,0,0};
+static Vector DoubleTapSpot = Vector{NULL,NULL,NULL};
 
 /* Fills points Vector. True if successful. False if not.  Credits for Original method - ReactiioN */
 static bool HeadMultiPoint(C_BasePlayer* player, Vector points[], matrix3x4_t boneMatrix[])
@@ -216,9 +216,9 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 
     float FOV = Settings::Ragebot::AutoAim::fov;
 
-	matrix3x4_t boneMatrix[128];
+	matrix3x4_t boneMatrix[256];
 
-	if ( !player->SetupBones(boneMatrix, 128, 256, 0) )
+	if ( !player->SetupBones(boneMatrix, 256, 256, 0) )
 		return;
 
 
@@ -240,12 +240,12 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 	    if (!HeadMultiPoint(player, headPoints, boneMatrix))
 			return;
 
-	    cvar->ConsoleDPrintf(XORSTR("Found the head\n"));
+	    // cvar->ConsoleDPrintf(XORSTR("Found the head\n"));
 	    for (int j = 0; j < HeadMultiVectors; j++)
 	    {
 			Autowall::FireBulletData data;
-			float spotDamage = Autowall::GetDamage(headPoints[j], false, data);
-			cvar->ConsoleDPrintf(XORSTR("Head Spot Damage : %d\n"), spotDamage);	
+			float spotDamage = Autowall::GetDamage(headPoints[j], true, data);
+			// cvar->ConsoleDPrintf(XORSTR("Head Spot Damage : %d\n"), spotDamage);	
 			
 			if (spotDamage <= 0.f )
 				continue;
@@ -262,8 +262,8 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 				{
 					*VisibleDamage = spotDamage;
 		    		*visibleSpot = headPoints[j];
-					deathDamage = true;
-					DeathBoneIndex = *i;
+					//deathDamage = true;
+					// DeathBoneIndex = *i;
 					return;
 				}
 		    	*VisibleDamage = spotDamage;
@@ -275,8 +275,8 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 				{
 					*wallbangdamage = spotDamage;
 		    		*wallbangspot = headPoints[j];
-					deathDamage = true;
-					DeathBoneIndex = *i;
+					//deathDamage = true;
+					// DeathBoneIndex = *i;
 					return;
 				}
 		    	*wallbangdamage = spotDamage;
@@ -295,7 +295,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 	    for (int j = 0; j < MultiVectors; j++)
 	    {
 			Autowall::FireBulletData data;
-			float spotDamage = Autowall::GetDamage(upperChest[j], false, data);
+			float spotDamage = Autowall::GetDamage(upperChest[j], true, data);
 
 			if (spotDamage <= 0.f )
 				continue;
@@ -312,8 +312,8 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 				{
 					*VisibleDamage = spotDamage;
 		    		*visibleSpot = upperChest[j];
-					deathDamage = true;
-					DeathBoneIndex = *i;
+					// deathDamage = true;
+					// DeathBoneIndex = *i;
 					return;
 				}
 		    	*VisibleDamage = spotDamage;
@@ -325,8 +325,8 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 				{
 					*wallbangdamage = spotDamage;
 		    		*wallbangspot = upperChest[j];
-					deathDamage = true;
-					DeathBoneIndex = *i;
+					// deathDamage = true;
+					// DeathBoneIndex = *i;
 					return;
 				}
 		    	*wallbangdamage = spotDamage;
@@ -346,7 +346,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 	    for (int j = 0; j < MultiVectors; j++)
 	    {
 			Autowall::FireBulletData data;
-			float spotDamage = Autowall::GetDamage(MiddleChest[j], false, data);
+			float spotDamage = Autowall::GetDamage(MiddleChest[j], true, data);
 
 			if (spotDamage <= 0.f )
 				continue;
@@ -363,8 +363,8 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 				{
 					*VisibleDamage = spotDamage;
 		    		*visibleSpot = MiddleChest[j];
-					deathDamage = true;
-					DeathBoneIndex = *i;
+					// deathDamage = true;
+					// DeathBoneIndex = *i;
 					return;
 				}
 		    	*VisibleDamage = spotDamage;
@@ -376,8 +376,8 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 				{
 					*wallbangdamage = spotDamage;
 		    		*wallbangspot = MiddleChest[j];
-					deathDamage = true;
-					DeathBoneIndex = *i;
+					// deathDamage = true;
+					// DeathBoneIndex = *i;
 					return;
 				}
 		    	*wallbangdamage = spotDamage;
@@ -396,7 +396,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 	    for (int j = 0; j < MultiVectors; j++)
 	    {
 			Autowall::FireBulletData data;
-			float spotDamage = Autowall::GetDamage(LowerChest[j], false, data);
+			float spotDamage = Autowall::GetDamage(LowerChest[j], true, data);
 
 
 			if (spotDamage <= 0.f )
@@ -414,7 +414,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 				{
 					*VisibleDamage = spotDamage;
 		    		*visibleSpot = LowerChest[j];
-					deathDamage = true;
+					// deathDamage = true;
 					DeathBoneIndex = *i;
 					return;
 				}
@@ -427,8 +427,8 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 				{
 					*wallbangdamage = spotDamage;
 		    		*wallbangspot = LowerChest[j];
-					deathDamage = true;
-					DeathBoneIndex = *i;
+					// deathDamage = true;
+					// DeathBoneIndex = *i;
 					return;
 				}
 		    	*wallbangdamage = spotDamage;
@@ -443,7 +443,7 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 
 		//cvar->ConsoleDPrintf(XORSTR("bone ID : %d \n"), boneID);
 		Autowall::FireBulletData data;
-		float spotDamage = Autowall::GetDamage(bone3D, false, data);
+		float spotDamage = Autowall::GetDamage(bone3D, true, data);
 
 		if (spotDamage <= 0.f )
 			return;
@@ -460,8 +460,8 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 			{
 				*VisibleDamage = spotDamage;
 		    	*visibleSpot = bone3D;
-				deathDamage = true;
-				DeathBoneIndex = *i;
+				// deathDamage = true;
+				// DeathBoneIndex = *i;
 				return;
 			}
 		    *VisibleDamage = spotDamage;
@@ -473,8 +473,8 @@ static void safetyPrediction(C_BasePlayer* player, Vector *wallbangspot, float* 
 			{
 				*wallbangdamage = spotDamage;
 				*wallbangspot = bone3D;
-				deathDamage = true;
-				DeathBoneIndex = *i;
+				// deathDamage = true;
+				// DeathBoneIndex = *i;
 				return;
 			}
 		   	*wallbangdamage = spotDamage;
@@ -838,7 +838,7 @@ static void GetBestSpotAndDamage(C_BasePlayer* player, Vector& wallBangSpot, flo
 				return;
 			}
 				
-			if (VisibleDamage[i]*2 >= playerHelth)
+			if (VisibleDamage[i] >= playerHelth / 2)
 			{
 				visibleSpot = VisibleSpot[i];
 				visibleDamage = VisibleDamage[i];
@@ -846,7 +846,7 @@ static void GetBestSpotAndDamage(C_BasePlayer* player, Vector& wallBangSpot, flo
 				prevSpotDamage = 0.f;
 				return;
 			}
-			else if ( WallBangDamage[i]*2 >= playerHelth)
+			else if ( WallBangDamage[i] >= playerHelth / 2)
 			{
 				wallBangDamage = WallBangDamage[i];
 				wallBangSpot = WallBangSpot[i];
@@ -905,11 +905,11 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
     if ( doubletap )
 	{
 		*bestSpot = DoubleTapSpot;
-		DoubleTapSpot = Vector{0,0,0};
+		DoubleTapSpot = Vector{NULL,NULL,NULL};
 		doubletap = false;
 		return localplayer;
 	}
-	
+
     float bestFov = Settings::Ragebot::AutoAim::fov;
 
     for (int i = 1; i < engine->GetMaxClients(); ++i)
@@ -1048,6 +1048,12 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 		}
 	}
     }
+
+	if ( bestSpot->IsZero() )
+	{
+		prevSpotDamage  = 0.f;
+		return nullptr;
+	}
 	prevSpotDamage  = 0.f;
     return closestEntity;
 }
@@ -1400,11 +1406,6 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 	Settings::Debug::AutoAim::target = bestSpot; // For Debug showing aimspot.
 	if (RagebotShouldAim)
 	{
-	    if (Settings::Ragebot::Prediction::enabled)
-	    {
-			localEye = VelocityExtrapolate(localplayer, localEye); // get eye pos next tick
-			bestSpot = VelocityExtrapolate(player, bestSpot); // get target pos next tick
-	    }
 	    angle = Math::CalcAngle(localEye, bestSpot);
 	}
     }
