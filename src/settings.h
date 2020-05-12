@@ -19,6 +19,11 @@ enum class DamagePrediction : int {
 
 };
 
+enum class EnemySelectionType : int {
+	BestDamage = 0,
+	CLosestToCrosshair,
+};
+
 enum class DrawingBackend : int {
     SURFACE = 0,
     IMGUI,
@@ -291,15 +296,16 @@ struct RagebotWeapon_t
 		 autoShootEnabled,
 		 autoScopeEnabled,
 		 autoSlow,
-		 predEnabled,
 		 scopeControlEnabled,
-		 HitChanceOverwrriteEnable;
+		 HitChanceOverwrriteEnable,
+		 DoubleFire;
 	float RagebotautoAimFov = 180.f,
 		  autoWallValue = 10.0f,
 		  visibleDamage = 50.f,
 		  HitChance = 20.f,
 		  HitchanceOverwrriteValue = 1.f;
 	DamagePrediction DmagePredictionType = DamagePrediction::safety;
+	EnemySelectionType enemySelectionType = EnemySelectionType::CLosestToCrosshair;
 	bool desiredBones[31];
 	
 
@@ -322,12 +328,13 @@ struct RagebotWeapon_t
 			this->autoWallValue == Ragebotanother.autoWallValue &&
 			this->visibleDamage == Ragebotanother.visibleDamage &&
 			this->autoSlow == Ragebotanother.autoSlow &&
-			this->predEnabled == Ragebotanother.predEnabled &&
 			this->scopeControlEnabled == Ragebotanother.scopeControlEnabled && 
 			this->HitChanceOverwrriteEnable == Ragebotanother.HitChanceOverwrriteEnable &&
 			this->HitchanceOverwrriteValue == Ragebotanother.HitchanceOverwrriteValue &&
 			this->HitChance == Ragebotanother.HitChance && 
-			this->DmagePredictionType == Ragebotanother.DmagePredictionType;
+			this->DmagePredictionType == Ragebotanother.DmagePredictionType && 
+			this->enemySelectionType == Ragebotanother.enemySelectionType && 
+			this->DoubleFire == Ragebotanother.DoubleFire;
 	}
 
 } const ragedefault{};
@@ -383,10 +390,10 @@ namespace Settings
 {
 	namespace UI
 	{
-		inline ColorVar mainColor = ImColor(32, 32, 23, 255 );
-		inline ColorVar bodyColor = ImColor( 5, 3, 12, 255 );
-		inline ColorVar fontColor = ImColor( 192, 218, 217, 255 );
-		inline ColorVar accentColor = ImColor( 82, 255, 24, 106 );
+		inline ColorVar mainColor = ImColor(17, 73, 40, 255 );
+		inline ColorVar bodyColor = ImColor( 30, 24, 38, 232 );
+		inline ColorVar fontColor = ImColor( 153, 199, 70, 187 );
+		inline ColorVar accentColor = ImColor( 21, 127, 176, 106 );
 		inline bool imGuiAliasedLines = false;
 		inline bool imGuiAliasedFill = false;
 
@@ -614,13 +621,16 @@ namespace Settings
 		inline bool enabled = false;
         inline bool silent = false;
         inline bool friendly = false;
+		inline bool DoubleFire = false;
 
 		inline DamagePrediction damagePrediction = DamagePrediction::safety;
+		inline EnemySelectionType enemySelectionType = EnemySelectionType::CLosestToCrosshair;
+
 		namespace AutoAim
 		{
 			inline bool enabled = false;
             inline float fov = 180.0f;
-            inline bool desiredBones[] = {true, false, true, true, true, true, true, // center mass
+            inline bool desiredBones[] = {true, true, true, true, true, true, true, // center mass
                                           true, true, true, true, true, true, true, // left arm
                                           true, true, true, true, true, true, true, // right arm
                                           true, true, true, true, true, // left leg
@@ -645,11 +655,6 @@ namespace Settings
 			inline bool autoscope = false;
 		}
 
-		namespace AutoCrouch
-		{
-			inline bool enabled = false;
-		}
-
 		namespace AutoSlow
 		{
 			inline bool enabled = false;
@@ -665,11 +670,6 @@ namespace Settings
 		{
 			inline bool enable = false;
 			inline float value = 1.0f;
-		}
-
-		namespace Prediction
-		{
-			inline bool enabled = false;
 		}
 
 		namespace ScopeControl

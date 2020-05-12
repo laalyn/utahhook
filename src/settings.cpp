@@ -235,9 +235,10 @@ void Settings::LoadDefaultsOrSave(std::string path)
 	RageweaponSetting[XORSTR("AutoWall")][XORSTR("Value")] = i.second.autoWallValue;
     RageweaponSetting[XORSTR("visibleDamage")] = i.second.visibleDamage;
 	RageweaponSetting[XORSTR("AutoSlow")][XORSTR("Enabled")] = i.second.autoSlow;
-	RageweaponSetting[XORSTR("Prediction")][XORSTR("Enabled")] = i.second.predEnabled;
+	RageweaponSetting[XORSTR("DoubleFire")][XORSTR("Enabled")] = i.second.DoubleFire;
 	RageweaponSetting[XORSTR("ScopeControl")][XORSTR("Enabled")] = i.second.scopeControlEnabled;
     RageweaponSetting[XORSTR("DamagePrediction")][XORSTR("Type")] = (int)i.second.DmagePredictionType;
+    RageweaponSetting[XORSTR("EnemySelectionType")][XORSTR("Type")] = (int)i.second.enemySelectionType;
 
 	for (int bone = BONE_PELVIS; bone <= BONE_RIGHT_SOLE; bone++)
 	    RageweaponSetting[XORSTR("DesiredBones")][XORSTR("Bones")][bone] = i.second.desiredBones[bone];
@@ -626,7 +627,6 @@ void Settings::LoadDefaultsOrSave(std::string path)
     settings[XORSTR("ThirdPerson")][XORSTR("toggled")] = Settings::ThirdPerson::toggled;
     settings[XORSTR("ThirdPerson")][XORSTR("distance")] = Settings::ThirdPerson::distance;
     settings[XORSTR("ThirdPerson")][XORSTR("togglekey")] = Util::GetButtonName(Settings::ThirdPerson::toggleThirdPerson);
-    settings[XORSTR("ThirdPerson")][XORSTR("type")] = (int)Settings::ThirdPerson::type;
 
     settings[XORSTR("JumpThrow")][XORSTR("enabled")] = Settings::JumpThrow::enabled;
     settings[XORSTR("JumpThrow")][XORSTR("key")] = Util::GetButtonName(Settings::JumpThrow::key);
@@ -792,18 +792,18 @@ void Settings::LoadConfig(std::string path)
 	    .autoShootEnabled = RageweaponSetting[XORSTR("AutoShoot")][XORSTR("Enabled")].asBool(),
 	    .autoScopeEnabled = RageweaponSetting[XORSTR("AutoScope")][XORSTR("Enabled")].asBool(),
 	    .autoSlow = RageweaponSetting[XORSTR("AutoSlow")][XORSTR("Enabled")].asBool(),
-	    .predEnabled = RageweaponSetting[XORSTR("Prediction")][XORSTR("Enabled")].asBool(),
 	    .scopeControlEnabled = RageweaponSetting[XORSTR("ScopeControl")][XORSTR("Enabled")].asBool(),
 		.HitChanceOverwrriteEnable = RageweaponSetting[XORSTR("HitChanceOverwrride")][XORSTR("Enable")].asBool(),
+        .DoubleFire = RageweaponSetting[XORSTR("Prediction")][XORSTR("Enabled")].asBool(),
 	    .RagebotautoAimFov = RageweaponSetting[XORSTR("AutoAim")][XORSTR("RageFOV")].asFloat(),
 	    .autoWallValue = RageweaponSetting[XORSTR("AutoWall")][XORSTR("Value")].asFloat(),
         .visibleDamage = RageweaponSetting[XORSTR("visibleDamage")].asFloat(),
 	    .HitChance = RageweaponSetting[XORSTR("HitChance")][XORSTR("Value")].asFloat(),
         .HitchanceOverwrriteValue = RageweaponSetting[XORSTR("HitChanceOverwrride")][XORSTR("Value")].asFloat(),
-        //.DmagePredictionType = RageweaponSetting[XORSTR("DamagePrediction")][XORSTR("Type")].asUInt(),
 	};
     // Getting value like this because can't find anyother way convert value from json to enum
     GetVal(RageweaponSetting[XORSTR("DamagePrediction")][XORSTR("Type")], (int*)&weapon.DmagePredictionType);
+     GetVal(RageweaponSetting[XORSTR("EnemySelectionType")][XORSTR("Type")], (int*)&weapon.enemySelectionType);
 
 	for (int bone = BONE_PELVIS; bone <= BONE_RIGHT_SOLE; bone++)
 	    weapon.desiredBones[bone] = RageweaponSetting[XORSTR("DesiredBones")][XORSTR("Bones")][bone].asBool();
@@ -1248,7 +1248,6 @@ void Settings::LoadConfig(std::string path)
     GetVal(settings[XORSTR("ThirdPerson")][XORSTR("toggled")], &Settings::ThirdPerson::toggled);
     GetVal(settings[XORSTR("ThirdPerson")][XORSTR("distance")], &Settings::ThirdPerson::distance);
     GetButtonCode(settings[XORSTR("ThirdPerson")][XORSTR("togglekey")], &Settings::ThirdPerson::toggleThirdPerson);
-    GetVal(settings[XORSTR("ThirdPerson")][XORSTR("type")], (int*)&Settings::ThirdPerson::type);
 
     GetVal(settings[XORSTR("JumpThrow")][XORSTR("enabled")], &Settings::JumpThrow::enabled);
     GetButtonCode(settings[XORSTR("JumpThrow")][XORSTR("key")], &Settings::JumpThrow::key);
