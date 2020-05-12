@@ -28,6 +28,14 @@ static float prevSpotDamage = NULL;
 
 static Vector DoubleTapSpot = Vector{NULL,NULL,NULL};
 
+struct Enemy
+{
+	C_BasePlayer* player = nullptr;
+	int Index = 0;
+	int size = 0;
+};
+
+
 /* Fills points Vector. True if successful. False if not.  Credits for Original method - ReactiioN */
 static bool HeadMultiPoint(C_BasePlayer* player, Vector points[], matrix3x4_t boneMatrix[])
 {
@@ -897,13 +905,14 @@ static Vector VelocityExtrapolate(C_BasePlayer* player, Vector aimPos)
 * To find the closesnt enemy to reduce the calculation time and increase perdormace
 */
 
-static C_BasePlayer* GetClosestEnemy (C_BasePlayer *localplayer)
+static C_BasePlayer* GetClosestEnemy (C_BasePlayer *localplayer, CUserCmd* cmd)
 {
 	C_BasePlayer* closenstEntity = nullptr;
 	
-	static float prevDistance = 0;
+	float prevDistance = 0.f;
+
 	for (int i = 1; i < engine->GetMaxClients(); ++i)
-    {
+	{
 		C_BasePlayer* player = (C_BasePlayer*)entityList->GetClientEntity(i);
 
 		if (!player
@@ -914,21 +923,58 @@ static C_BasePlayer* GetClosestEnemy (C_BasePlayer *localplayer)
 	    	continue;
 
 		if (!Settings::Ragebot::friendly && Entity::IsTeamMate(player, localplayer))
-	    	continue;
-		// Vector localPos = localplayer->GetEyePosition();
-		// Vector enemyPos = player->GetAbsOrigin();
-		QAngle ViewAngle = Math::CalcAngle(localplayer->GetAbsOrigin(), player->GetAbsOrigin());
-		// localPos.z = enemyPos.z;
+	   	 	continue;
+		QAngle localEyePos = *localplayer->GetEyeAngles();
+		QAngle ViewAngle = *localplayer->GetVAngles();
+		Vector localPos = localplayer->GetEyePosition();
+		Vector enemyPos = player->GetAbsOrigin();
+		QAngle viewAngles = cmd->viewangles;
 
-		float distance = ViewAngle.Length();
-		if ( distance > prevDistance )
+		if ( localPos.z < 0)
+			localPos.z *= -1;
+		if ( localPos.y < 0)
+			localPos.y *= -1;
+
+		/*
+		if (enemyPos.y < 0)
+			enemyPos.y *= -1;
+		if ( enemyPos.z < 0 )
+			enemyPos.z *= -1;
+
+		if ( viewAngles.z < 0)
+			viewAngles.z *= -1;
+		if ( viewAngles.y < 0)
+			viewAngles.y *= -1;
+		*/
+		// QAngle DistanceAngle = Math::CalcAngle(localplayer->GetAbsOrigin(), enemyPos);
+		//float distance = Math::CalMaxDistance(localPos, enemyPos);
+		float distance = Math::CalMaxDistance(viewAngles, enemyPos);
+		// QAngle ViewOffset = Math::CalcAngle(localplayer->GetVecViewOffset(), enemyPos);
+		//float distance = Math::CalMaxDistance(localplayer->GetVecViewOffset(), enemyPos);
+		
+		cvar->ConsoleDPrintf(XORSTR (" Local player eyePosition : %f \n"), localplayer->GetEyePosition());
+		cvar->ConsoleDPrintf(XORSTR (" enemy pos : %f \n"), enemyPos);
+		//float distance = DistanceAngle.Length();
+		// float view = ViewAngle.Length();
+		//float viewDirection = ViewOffset.Length();
+		if (prevDistance == 0 && distance != 0)
 		{
+			// prevViewOffset = viewDirection;
+			prevDistance = distance;
 			closenstEntity = player;
 		}
-	}
+		else if ( distance > prevDistance /*&& view > prevViewAngle &&*/ /*viewDirection < prevViewOffset*/)
+		{
+			prevDistance = distance;
+			// prevViewAngle = view;
+			//prevViewOffset = viewDirection;
+			closenstEntity = player;
+		}
 
+	}
 	return closenstEntity;
 }
+
 static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, float* bestDamage, AimTargetType aimTargetType = AimTargetType::FOV)
 {
 	
@@ -954,13 +1000,32 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 	float WallBangdamage = 0.f, 
 			VisibleDamage = 0.f;
 
-	C_BasePlayer* player = GetClosestEnemy(localplayer);
+	//static Enemy enemy[3];
+/*
+	C_BasePlayer* player = nullptr;
+	for ( int i = 1; i < engine->GetMaxClients(); ++i)
+	{
+		int j = 0;
+		if ( player = GetClosestEnemy(localplayer, i) )
+		{
+			enemy[j].player = player;
+			enemy[j].Index = j;
+			enemy[0].size += j+1;
+			j++;
+		}
+		
+	}
+	*/
+
+	C_BasePlayer* player = GetClosestEnemy(localplayer, cmd);
 	
 	if ( player == nullptr )
 	{
-		cvar->ConsoleDPrintf(XORSTR("returning null mean no enemy \n"));
+		//cvar->ConsoleDPrintf(XORSTR("returning null mean no enemy \n"));
 		return player;
 	}
+
+//cvar->ConsoleDPrintf(XORSTR("Find a player"));
 		
 	GetBestSpotAndDamage(player, wallBangSpot, WallBangdamage, VisibleSpot, VisibleDamage);
 
