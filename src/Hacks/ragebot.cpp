@@ -963,7 +963,7 @@ static C_BasePlayer* GetClosestEnemy (C_BasePlayer *localplayer, CUserCmd* cmd)
 			prevDistance = distance;
 			closenstEntity = player;
 		}
-		else if ( distance > prevDistance /*&& view > prevViewAngle &&*/ /*viewDirection < prevViewOffset*/)
+		else if ( distance < prevDistance /*&& view > prevViewAngle &&*/ /*viewDirection < prevViewOffset*/)
 		{
 			prevDistance = distance;
 			// prevViewAngle = view;
