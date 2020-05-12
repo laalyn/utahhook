@@ -1,6 +1,6 @@
 #include "math.h"
 
-#define square(x) ( x * x )
+#define square(x) ( x =  x * x )
 
 
 bool Math::Cmpf( float f1, float f2, float epsilon ) {
@@ -239,22 +239,13 @@ float Math::CalMaxDistance(const Vector &src, const Vector &dest)
 
 float Math::CalMaxDistance(const QAngle &src, const Vector &dest)
 {
-	float Ydistance,
-			ZDistance;
+	float Ydistance = src.y - dest.y,
+			ZDistance =src.z - dest.z,
+			XDistance = src.x - dest.x, 
+			tempdistance;
 
-	// Getting Y axis distance
-	if (src.y > dest.y)
-		Ydistance = src.y - dest.y;
-	else if (src.y < dest.y)
-		Ydistance = dest.y - src.y;
-
-	// Calculate the z distance
-	if (src.z > dest.z)
-		ZDistance = src.z - dest.z;
-	else if (src.z < dest.z)
-		ZDistance = dest.z - src.z;	
-
-	return Math::SquareRoot( square(Ydistance) + square(ZDistance) );
+	return tempdistance = Math::SquareRoot( square(Ydistance) + square(ZDistance) );
+	return Math::SquareRoot( square(tempdistance) + square(XDistance) );
 }
 void Math::AngleMatrix(const Vector angles, matrix3x4_t& matrix)
 {

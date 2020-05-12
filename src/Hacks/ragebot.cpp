@@ -11,6 +11,7 @@
 
 #include <future>
 
+#define absolute(x) ( x = x < 0 ? x * -1 : x)
 std::vector<int64_t> Ragebot::friends = {};
 std::vector<long> RagebotkillTimes = { 0 }; // the Epoch time from when we kill someone
 
@@ -909,7 +910,11 @@ static C_BasePlayer* GetClosestEnemy (C_BasePlayer *localplayer, CUserCmd* cmd)
 {
 	C_BasePlayer* closenstEntity = nullptr;
 	
-	float prevDistance = 0.f;
+	float prevDistance = 0.f,
+	  		cbFov = 0.f;
+	Vector pVecTarget = localplayer->GetEyePosition();
+	QAngle viewAngles;
+		engine->GetViewAngles(viewAngles);
 
 	for (int i = 1; i < engine->GetMaxClients(); ++i)
 	{
@@ -924,53 +929,26 @@ static C_BasePlayer* GetClosestEnemy (C_BasePlayer *localplayer, CUserCmd* cmd)
 
 		if (!Settings::Ragebot::friendly && Entity::IsTeamMate(player, localplayer))
 	   	 	continue;
-		QAngle localEyePos = *localplayer->GetEyeAngles();
-		QAngle ViewAngle = *localplayer->GetVAngles();
-		Vector localPos = localplayer->GetEyePosition();
+
+		Vector cbVecTarget = player->GetAbsOrigin();
+		
+		cbFov = Math::GetFov(viewAngles, Math::CalcAngle(pVecTarget, cbVecTarget));
 		Vector enemyPos = player->GetAbsOrigin();
 		QAngle viewAngles = cmd->viewangles;
-
-		if ( localPos.z < 0)
-			localPos.z *= -1;
-		if ( localPos.y < 0)
-			localPos.y *= -1;
-
-		/*
-		if (enemyPos.y < 0)
-			enemyPos.y *= -1;
-		if ( enemyPos.z < 0 )
-			enemyPos.z *= -1;
-
-		if ( viewAngles.z < 0)
-			viewAngles.z *= -1;
-		if ( viewAngles.y < 0)
-			viewAngles.y *= -1;
-		*/
-		// QAngle DistanceAngle = Math::CalcAngle(localplayer->GetAbsOrigin(), enemyPos);
-		//float distance = Math::CalMaxDistance(localPos, enemyPos);
-		float distance = Math::CalMaxDistance(viewAngles, enemyPos);
-		// QAngle ViewOffset = Math::CalcAngle(localplayer->GetVecViewOffset(), enemyPos);
-		//float distance = Math::CalMaxDistance(localplayer->GetVecViewOffset(), enemyPos);
 		
-		cvar->ConsoleDPrintf(XORSTR (" Local player eyePosition : %f \n"), localplayer->GetEyePosition());
-		cvar->ConsoleDPrintf(XORSTR (" enemy pos : %f \n"), enemyPos);
-		//float distance = DistanceAngle.Length();
-		// float view = ViewAngle.Length();
-		//float viewDirection = ViewOffset.Length();
-		if (prevDistance == 0 && distance != 0)
+		//float distance = Math::CalMaxDistance(viewAngles, enemyPos);
+
+		if (prevDistance == 0 && cbFov != 0)
 		{
 			// prevViewOffset = viewDirection;
-			prevDistance = distance;
+			prevDistance = cbFov;
 			closenstEntity = player;
 		}
-		else if ( distance < prevDistance /*&& view > prevViewAngle &&*/ /*viewDirection < prevViewOffset*/)
+		else if ( cbFov < prevDistance /*&& view > prevViewAngle &&*/ /*viewDirection < prevViewOffset*/)
 		{
-			prevDistance = distance;
-			// prevViewAngle = view;
-			//prevViewOffset = viewDirection;
+			prevDistance = cbFov;
 			closenstEntity = player;
 		}
-
 	}
 	return closenstEntity;
 }
@@ -1021,11 +999,11 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 	
 	if ( player == nullptr )
 	{
-		//cvar->ConsoleDPrintf(XORSTR("returning null mean no enemy \n"));
+		cvar->ConsoleDPrintf(XORSTR("returning null mean no enemy \n"));
 		return player;
 	}
 
-//cvar->ConsoleDPrintf(XORSTR("Find a player"));
+		cvar->ConsoleDPrintf(XORSTR("Find a player \n"));
 		
 	GetBestSpotAndDamage(player, wallBangSpot, WallBangdamage, VisibleSpot, VisibleDamage);
 
@@ -1143,13 +1121,7 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 			
 		}
 	}
-    // }
 
-	if ( bestSpot->IsZero() )
-	{
-		prevSpotDamage  = 0.f;
-		return nullptr;
-	}
 	prevSpotDamage  = 0.f;
     return closestEntity;
 }
