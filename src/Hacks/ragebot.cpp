@@ -1,6 +1,5 @@
 #include "ragebot.h"
 #include "autowall.h"
-#include "legitbot.h"
 
 #include "../Utils/bonemaps.h"
 #include "../Utils/entity.h"
@@ -17,7 +16,7 @@ std::vector<long> RagebotkillTimes = { 0 }; // the Epoch time from when we kill 
 
 inline bool RagebotShouldAim = false, 
 			EnemyPresent = false,
-			doubletap = false,
+			doubleFire = false,
 			deathDamage = false;
 
 inline int prevWeaponIndex = NULL,
@@ -851,7 +850,7 @@ static void GetBestSpotAndDamage(C_BasePlayer* player, Vector& wallBangSpot, flo
 			{
 				visibleSpot = VisibleSpot[i];
 				visibleDamage = VisibleDamage[i];
-				doubletap = true;
+				doubleFire = true;
 				prevSpotDamage = 0.f;
 				return;
 			}
@@ -859,7 +858,7 @@ static void GetBestSpotAndDamage(C_BasePlayer* player, Vector& wallBangSpot, flo
 			{
 				wallBangDamage = WallBangDamage[i];
 				wallBangSpot = WallBangSpot[i];
-				doubletap = true;
+				doubleFire = true;
 				prevSpotDamage = 0.f;
 				return;
 			}
@@ -953,9 +952,12 @@ static C_BasePlayer* GetClosestEnemy (C_BasePlayer *localplayer, CUserCmd* cmd)
 	return closenstEntity;
 }
 
-static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, float* bestDamage, AimTargetType aimTargetType = AimTargetType::FOV)
+// get the clossest player from crosshair
+static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, float* bestDamage)
 {
-	
+	if ( !( Settings::Ragebot::enemySelectionType == EnemySelectionType::CLosestToCrosshair ) ) 
+		return nullptr;
+
     C_BasePlayer* localplayer = (C_BasePlayer*)entityList->GetClientEntity(engine->GetLocalPlayer());
     C_BasePlayer* closestEntity = nullptr;
 
@@ -963,30 +965,30 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 	{
 		return nullptr;
 	}
-    if ( doubletap && Settings::Ragebot::DoubleFire)
+    if ( doubleFire && Settings::Ragebot::DoubleFire)
 	{
 		*bestSpot = DoubleTapSpot;
 		DoubleTapSpot = Vector{NULL,NULL,NULL};
-		doubletap = false;
+		doubleFire = false;
 		return localplayer;
 	}
 	else
 	{
-		doubletap = false;
+		doubleFire = false;
 		*bestSpot = Vector{NULL, NULL, NULL};
 		DoubleTapSpot = Vector{NULL,NULL,NULL};
 	}
-	
 
-	
-    
-	Vector wallBangSpot = { 0, 0, 0 },
-	       	VisibleSpot = { 0, 0, 0 };
-	float WallBangdamage = 0.f, 
-			VisibleDamage = 0.f;
+	Vector wallBangSpot,
+	       	VisibleSpot;
+	float WallBangdamage, 
+			VisibleDamage;
+			
+			wallBangSpot = Vector{ NULL, NULL, NULL },
+	       	VisibleSpot = Vector{ NULL, NULL, NULL };
+			WallBangdamage = NULL, 
+			VisibleDamage = NULL;
 
-	if ( Settings::Ragebot::enemySelectionType == EnemySelectionType::CLosestToCrosshair) 
-	{
 		C_BasePlayer* player = GetClosestEnemy(localplayer, cmd);
 	
 		if ( player == nullptr )
@@ -1016,7 +1018,7 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 				}
 				else if ( VisibleDamage >= playerHelth/2 )
 				{
-					doubletap = true;
+					doubleFire = true;
 					*bestSpot = VisibleSpot;
 					*bestDamage = VisibleDamage;
 					DoubleTapSpot = VisibleSpot;
@@ -1043,7 +1045,7 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 				}
 				else if ( WallBangdamage >= playerHelth/2 )
 				{
-					doubletap = true;
+					doubleFire = true;
 					*bestSpot = wallBangSpot;
 					*bestDamage = WallBangdamage;
 					DoubleTapSpot = VisibleSpot;
@@ -1104,134 +1106,184 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 			
 			}
 		}
-	}	
-		
-	else if ( Settings::Ragebot::enemySelectionType == EnemySelectionType::BestDamage)
-	{
-		for  ( int i = 1; i < engine->GetMaxClients(); ++i)
-		{
-			C_BasePlayer* player = (C_BasePlayer*) entityList->GetClientEntity(i);
-
-			GetBestSpotAndDamage(player, wallBangSpot, WallBangdamage, VisibleSpot, VisibleDamage);
-
-			C_BaseCombatWeapon* activeWeapon = (C_BaseCombatWeapon*)entityList->GetClientEntityFromHandle(localplayer->GetActiveWeapon());
-
-			float playerHelth = player->GetHealth();
-
-			if ( VisibleDamage <= 0.f && WallBangdamage <= 0.f)
-					continue;
-
-			if (Settings::Ragebot::damagePrediction == DamagePrediction::safety)
-				{
-					if (VisibleDamage > 0.f && VisibleDamage >= WallBangdamage)
-					{
-						if (VisibleDamage >= playerHelth + 9 )
-						{
-							*bestDamage = VisibleDamage;
-							*bestSpot = VisibleSpot;
-							closestEntity = player;
-							lastRayEnd = VisibleSpot;
-							prevSpotDamage = 0.f;
-							return closestEntity;
-						}
-						else if ( VisibleDamage >= playerHelth/2 )
-						{
-							doubletap = true;
-							*bestSpot = VisibleSpot;
-							*bestDamage = VisibleDamage;
-							DoubleTapSpot = VisibleSpot;
-							prevSpotDamage = 0.f;
-							return player;
-						}
-
-						*bestDamage = VisibleDamage;
-						*bestSpot = VisibleSpot;
-						closestEntity = player;
-						lastRayEnd = VisibleSpot;
-						return closestEntity;
-					}
-					else if ( WallBangdamage > 0.f && WallBangdamage > VisibleDamage)
-					{
-						if (WallBangdamage >= playerHelth)
-						{
-							*bestDamage = WallBangdamage;
-		    				*bestSpot = wallBangSpot;
-		    				closestEntity = player;
-		    				lastRayEnd = wallBangSpot;
-							prevSpotDamage = 0.f;
-							return closestEntity;
-						}
-						else if ( WallBangdamage >= playerHelth/2 )
-						{
-							doubletap = true;
-							*bestSpot = wallBangSpot;
-							*bestDamage = WallBangdamage;
-							DoubleTapSpot = VisibleSpot;
-							prevSpotDamage = 0.f;
-							return player;
-						}
-
-						*bestDamage = WallBangdamage;
-		    			*bestSpot = wallBangSpot;
-		    			closestEntity = player;
-		    			lastRayEnd = wallBangSpot;
-						return closestEntity;	
-					}
-					else
-					{
-						return nullptr;
-					}	
-				}
-	
-			else if ( Settings::Ragebot::damagePrediction == DamagePrediction::damage) // if the damage prediction is best damage
-				{
-					if ( VisibleDamage >= WallBangdamage)
-					{
-						if (VisibleDamage >= playerHelth + 9)
-						{
-							*bestDamage = VisibleDamage;
-							*bestSpot = VisibleSpot;
-							closestEntity = player;
-							lastRayEnd = VisibleSpot;
-							prevSpotDamage = 0.f;
-							return closestEntity;
-						}
-						else if (VisibleDamage >= prevSpotDamage)
-						{
-							prevSpotDamage = *bestDamage = VisibleDamage;
-							*bestSpot = VisibleSpot;
-							closestEntity = player;
-							lastRayEnd = VisibleSpot;
-						}
-					}
-					else if ( WallBangdamage >= VisibleDamage)
-					{
-						if (WallBangdamage >= playerHelth + 9)
-						{
-							*bestDamage = WallBangdamage;
-		    				*bestSpot = wallBangSpot;
-		    				closestEntity = player;
-		    				lastRayEnd = wallBangSpot;
-							prevSpotDamage = 0.f;
-							return closestEntity;
-						}
-						else if (VisibleDamage >= prevSpotDamage)
-						{
-							prevSpotDamage = *bestDamage = WallBangdamage;
-		    				*bestSpot = wallBangSpot;
-		    				closestEntity = player;
-		    				lastRayEnd = wallBangSpot;
-						}
-					}
-				}
-		}
-	}
 	
 	prevSpotDamage  = 0.f;
     return closestEntity;
 }
 
-//Hitchance
+// Get the best damage and the player 
+static C_BasePlayer* GetBestEnemyAndSpot(CUserCmd* cmd, Vector* bestSpot, float* bestDamage)
+{
+	if ( !(Settings::Ragebot::enemySelectionType == EnemySelectionType::BestDamage) )
+		return nullptr;
+
+	C_BasePlayer* localplayer = (C_BasePlayer*)entityList->GetClientEntity(engine->GetLocalPlayer());
+    C_BasePlayer* closestEntity = nullptr;
+
+	if (!localplayer->GetAlive())
+	{
+		return nullptr;
+	}
+    if ( doubleFire && Settings::Ragebot::DoubleFire)
+	{
+		*bestSpot = DoubleTapSpot;
+		DoubleTapSpot = Vector{NULL,NULL,NULL};
+		doubleFire = false;
+		return localplayer;
+	}
+	else
+	{
+		doubleFire = false;
+		*bestSpot = Vector{NULL, NULL, NULL};
+		DoubleTapSpot = Vector{NULL,NULL,NULL};
+	}
+
+	Vector wallBangSpot,
+	       	VisibleSpot;
+	float WallBangdamage, 
+			VisibleDamage;
+			
+			wallBangSpot = Vector{ NULL, NULL, NULL },
+	       	VisibleSpot = Vector{ NULL, NULL, NULL };
+			WallBangdamage = NULL, 
+			VisibleDamage = NULL;
+
+	cvar->ConsoleDPrintf(XORSTR("in best damage function"));
+	for (int i = 1; i < engine->GetMaxClients(); ++i)
+	{
+		C_BasePlayer* player = (C_BasePlayer*) entityList->GetClientEntity(i);
+
+		if (!player
+			|| player == localplayer
+			|| player->GetDormant()
+			|| !player->GetAlive()
+			|| player->GetImmune())
+			continue;
+
+		if (!Settings::Ragebot::friendly && Entity::IsTeamMate(player, localplayer))
+			continue;
+
+		if( !Ragebot::friends.empty() ) // check for friends, if any
+		{
+			IEngineClient::player_info_t entityInformation;
+			engine->GetPlayerInfo(i, &entityInformation);
+
+			if (std::find(Ragebot::friends.begin(), Ragebot::friends.end(), entityInformation.xuid) != Ragebot::friends.end())
+				continue;
+
+		}
+			GetBestSpotAndDamage(player, wallBangSpot, WallBangdamage, VisibleSpot, VisibleDamage);
+
+		C_BaseCombatWeapon* activeWeapon = (C_BaseCombatWeapon*)entityList->GetClientEntityFromHandle(localplayer->GetActiveWeapon());
+
+		float playerHelth = player->GetHealth();
+
+		if (Settings::Ragebot::damagePrediction == DamagePrediction::safety)
+		{
+			if (VisibleDamage > 0.f && VisibleDamage >= WallBangdamage)
+			{
+				if (  VisibleDamage >= playerHelth + 9)
+				{
+					*bestDamage = VisibleDamage;
+					*bestSpot = VisibleSpot;
+					closestEntity = player;
+					lastRayEnd = VisibleSpot;
+					prevSpotDamage = 0.f;
+					return closestEntity;
+				}
+				else if ( VisibleDamage >= playerHelth/2 )
+				{
+					doubleFire = true;
+					*bestSpot = VisibleSpot;
+					*bestDamage = VisibleDamage;
+					DoubleTapSpot = VisibleSpot;
+					prevSpotDamage = 0.f;
+					return player;
+				}
+
+				*bestDamage = VisibleDamage;
+				*bestSpot = VisibleSpot;
+				closestEntity = player;
+				lastRayEnd = VisibleSpot;
+				return closestEntity;
+			}
+			else if ( WallBangdamage > 0.f && WallBangdamage > VisibleDamage)
+			{
+				if (WallBangdamage >= playerHelth)
+				{
+					*bestDamage = WallBangdamage;
+		    		*bestSpot = wallBangSpot;
+		    		closestEntity = player;
+		    		lastRayEnd = wallBangSpot;
+					prevSpotDamage = 0.f;
+					return closestEntity;
+				}
+				else if ( WallBangdamage >= playerHelth/2 )
+				{
+					doubleFire = true;
+					*bestSpot = wallBangSpot;
+					*bestDamage = WallBangdamage;
+					DoubleTapSpot = VisibleSpot;
+					prevSpotDamage = 0.f;
+					return player;
+				}
+				*bestDamage = WallBangdamage;
+		    	*bestSpot = wallBangSpot;
+		    	closestEntity = player;
+		    	lastRayEnd = wallBangSpot;
+				return closestEntity;	
+			}		
+		}
+		
+		else if ( Settings::Ragebot::damagePrediction == DamagePrediction::damage) // if the damage prediction is best damage
+		{
+			if ( VisibleDamage > 0.f &&  VisibleDamage >= WallBangdamage)
+			{
+				if (VisibleDamage >= playerHelth + 9)
+				{
+					*bestDamage = VisibleDamage;
+					*bestSpot = VisibleSpot;
+					closestEntity = player;
+					lastRayEnd = VisibleSpot;
+					prevSpotDamage = 0.f;
+					return closestEntity;
+				}
+				else if (VisibleDamage >= prevSpotDamage)
+				{
+					prevSpotDamage = *bestDamage = VisibleDamage;
+					*bestSpot = VisibleSpot;
+					closestEntity = player;
+					lastRayEnd = VisibleSpot;
+				}
+			}
+			else if ( WallBangdamage > 0.f && WallBangdamage > VisibleDamage)
+			{
+				if (WallBangdamage >= playerHelth + 9)
+				{
+					*bestDamage = WallBangdamage;
+		    		*bestSpot = wallBangSpot;
+		    		closestEntity = player;
+		    		lastRayEnd = wallBangSpot;
+					prevSpotDamage = 0.f;
+					return closestEntity;
+				}
+				else if (VisibleDamage >= prevSpotDamage)
+				{
+					prevSpotDamage = *bestDamage = WallBangdamage;
+		    		*bestSpot = wallBangSpot;
+		    		closestEntity = player;
+		    		lastRayEnd = wallBangSpot;
+				}
+			
+			}
+		}
+	
+	}
+
+	return closestEntity;
+}
+
+//Hitchance source from nanoscence
 static bool Ragebothitchance(C_BasePlayer* localplayer, C_BaseCombatWeapon* activeWeapon)
 {
     float hitchance = 101;
@@ -1310,7 +1362,7 @@ static void RagebotAutoSlow(C_BasePlayer* player, float& forward, float& sideMov
 
     if (nextPrimaryAttack > globalVars->curtime)
     {
-	return;
+		return;
     }
 
     C_BasePlayer* localplayer = (C_BasePlayer*)entityList->GetClientEntity(engine->GetLocalPlayer());
@@ -1321,22 +1373,22 @@ static void RagebotAutoSlow(C_BasePlayer* player, float& forward, float& sideMov
 
     if (Settings::Ragebot::HitChance::enabled && RagebotShouldAim)
     {
-	if (!Ragebothitchance(localplayer, activeWeapon))
-	{
-	    cmd->buttons |= IN_WALK;
-	    forward = 0;
-	    sideMove = 0;
-	    cmd->upmove = 0;
-	    return;
-	}
-	else if (Ragebothitchance(localplayer, activeWeapon))
-	{
-	    cmd->buttons |= IN_WALK;
-	}
-	else
-	{
-	    return;
-	}
+		if (!Ragebothitchance(localplayer, activeWeapon))
+		{
+	   	 	cmd->buttons |= IN_WALK;
+	    	forward = 0;
+	    	sideMove = 0;
+	    	cmd->upmove = 0;
+	    	return;
+		}
+		else if (Ragebothitchance(localplayer, activeWeapon))
+		{
+	    	cmd->buttons |= IN_WALK;
+		}
+		else
+		{
+	    	return;
+		}
 
 	// Experimental items
 	/*if (!(HitPercentage(localplayer, activeWeapon)))
@@ -1390,20 +1442,13 @@ static void RagebotAutoSlow(C_BasePlayer* player, float& forward, float& sideMov
 
     else if ((active_weapon->GetSpread() + active_weapon->GetInaccuracy()) > (activeWeapon->GetCSWpnData()->GetMaxPlayerSpeed() / 3.0f)) // https://youtu.be/ZgjYxBRuagA
     {
-	cmd->buttons |= IN_WALK;
-	forward = -forward;
-	sideMove = -sideMove;
-	cmd->upmove = 0;
-	return;
+		cmd->buttons |= IN_WALK;
+		forward = -forward;
+		sideMove = -sideMove;
+		cmd->upmove = 0;
+		return;
     }
-    else if ((active_weapon->GetSpread() + active_weapon->GetInaccuracy()) == (activeWeapon->GetCSWpnData()->GetMaxPlayerSpeed() / 3.0f))
-    {
-	cmd->buttons |= IN_WALK;
-	forward = 0;
-	sideMove = 0;
-	cmd->upmove = 0;
-	return;
-    }
+
 }
 
 static void RagebotAutoPistol(C_BaseCombatWeapon* activeWeapon, CUserCmd* cmd)
@@ -1549,11 +1594,14 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 
     Vector bestSpot;
 	float bestDamage;
-	bestSpot = { 0, 0, 0 };
-	bestDamage = 0.f;
-	//cvar->ConsoleDPrintf(XORSTR("bestDamage in first : %d \n"), bestDamage);
-    C_BasePlayer* player = GetClosestPlayerAndSpot(cmd, &bestSpot, &bestDamage);
-	//cvar->ConsoleDPrintf(XORSTR("bestDamage : %d \n"), bestDamage);
+	bestSpot = { NULL, NULL, NULL };
+	bestDamage = NULL;
+
+	C_BasePlayer* player = nullptr;
+	if ( Settings::Ragebot::enemySelectionType == EnemySelectionType::CLosestToCrosshair)
+    	player = GetClosestPlayerAndSpot(cmd, &bestSpot, &bestDamage);
+	else if ( Settings :: Ragebot::enemySelectionType == EnemySelectionType::BestDamage )
+		player = GetBestEnemyAndSpot(cmd, &bestSpot, &bestDamage);
 
     if (player)
     {
@@ -1573,17 +1621,17 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 		{
 	    	RagebotShouldAim = true;
 		}
-	else if (cmd->buttons & IN_ATTACK)
-	{
-	    RagebotShouldAim = true;
-	}
+		else if (cmd->buttons & IN_ATTACK)
+		{
+	    	RagebotShouldAim = true;
+		}
 
-	Settings::Debug::AutoAim::target = bestSpot; // For Debug showing aimspot.
-	if (RagebotShouldAim)
-	{
-	    angle = Math::CalcAngle(localEye, bestSpot);
-	}
-    }
+		Settings::Debug::AutoAim::target = bestSpot; // For Debug showing aimspot.
+		if (RagebotShouldAim)
+		{
+	   		angle = Math::CalcAngle(localEye, bestSpot);
+		}
+   	}	
     else if (EnemyPresent) // Just Increase the probrability of scoping for faster shooting in some cases
     {
 		EnemyPresent = !EnemyPresent;
@@ -1602,13 +1650,11 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 		EnemyPresent = false;
     }
 
-    //RagebotAutoCrouch(player, cmd);
     RagebotAutoSlow(player, oldForward, oldSideMove, bestDamage, activeWeapon, cmd);
     RagebotAutoPistol(activeWeapon, cmd);
     RagebotAutoShoot(player, activeWeapon, cmd);
     AutoCock(player, activeWeapon, cmd);
     RagebotRCS(angle, player, cmd, localplayer, activeWeapon);
-	// RagebotNoShoot(activeWeapon, player, cmd);
 
     Math::NormalizeAngles(angle);
     Math::ClampAngles(angle);
