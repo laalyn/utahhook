@@ -100,6 +100,7 @@ Now, go back into CS:GO, if you are in the main menu of the game you should see 
 ![this](Pictures/mainmenu-ss.png)
 
 *Note:* if you are getting crashes ( that are unrelated to game updates ) Try disabling shader precaching in your Steam Client -> Steam -> Settings -> Shader Pre-Caching. 
+if the crash is because you are visiting an old commit, try updating valve sdk values in the sdk folder.
 
 ## Using the hack
 
@@ -143,7 +144,6 @@ ls -la ~/
 Each `config.json` is stored in the folder named after them map name.
 
 To add a config, copy the folder containing it to `~/.config/MissedIT/CSGO`
-
 
 ## Screenshots
 
