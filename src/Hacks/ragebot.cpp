@@ -7,6 +7,7 @@
 #include "../Utils/xorstring.h"
 #include "../interfaces.h"
 #include "../settings.h"
+#include "lagcomp.h"
 
 #include <future>
 
@@ -1697,6 +1698,19 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 		Settings::Debug::AutoAim::target = bestSpot; // For Debug showing aimspot.
 		if (RagebotShouldAim)
 		{
+		    // Tried this out, so the tick of the shot = the tick before the shot
+		    // Worked better in my head.
+		    // if (Settings::LagComp::enabled)
+		    // {
+		// 	for (auto &tick : LagComp::lagCompTicks[0].records)
+		// 	{
+		// 	    if (tick.entity == player)
+		// 	    {
+		// 		bestSpot = tick.head;
+		// 		cmd->tick_count = LagComp::lagCompTicks[0].tickCount;
+		// 	    }
+		// 	}
+		  //   }
 	   		angle = Math::CalcAngle(localEye, bestSpot);
 		}
    	}	

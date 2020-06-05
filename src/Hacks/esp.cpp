@@ -2,6 +2,7 @@
 
 #include "esp.h"
 #include "autowall.h"
+#include "lagcomp.h"
 #include "../fonts.h"
 #include "../settings.h"
 #include "../interfaces.h"
@@ -671,6 +672,21 @@ static void DrawHeaddot( C_BasePlayer* player ) {
 	Draw::AddCircleFilled( head2D.x, head2D.y, Settings::ESP::HeadDot::size, ESP::GetESPPlayerColor( player, bIsVisible ), 10 );
 }
 
+static void DrawBacktrack( C_BasePlayer* player )
+{
+    Vector head2D;
+
+    for (auto& frame : LagComp::lagCompTicks)
+    {
+	for (auto& ticks : frame.records)
+	{
+	    if ( debugOverlay->ScreenPosition( ticks.head, head2D ) )
+		continue;
+	    Draw::AddCircleFilled( head2D.x, head2D.y, Settings::ESP::HeadDot::size, ESP::GetESPPlayerColor( player, false ), 3 );
+	}
+    }
+}
+
 static void DrawSounds( C_BasePlayer *player, ImColor playerColor ) {
     std::unique_lock<std::mutex> lock( footstepMutex, std::try_to_lock );
     if( lock.owns_lock() ){
@@ -935,6 +951,11 @@ static void DrawPlayer(C_BasePlayer* player)
 
 	if (Settings::ESP::HeadDot::enabled)
 		DrawHeaddot(player);
+
+    	// offer the 'nice chams' only when turned on in visuals
+    	// otherwise gives them the dots in esp.cpp
+	if (Settings::LagComp::enabled && !Settings::ESP::Backtrack::enabled)
+	    DrawBacktrack(player);
 
 	if (Settings::Debug::AutoWall::debugView)
 		DrawAutoWall(player);

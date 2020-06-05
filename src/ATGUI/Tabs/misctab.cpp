@@ -437,6 +437,8 @@ void Misc::RenderTab()
 				ImGui::Checkbox(XORSTR("Sniper Crosshair"), &Settings::SniperCrosshair::enabled);
 				ImGui::Checkbox(XORSTR("Disable post-processing"), &Settings::DisablePostProcessing::enabled);
 				ImGui::Checkbox(XORSTR("No Duck Cooldown"), &Settings::NoDuckCooldown::enabled);
+				ImGui::Checkbox(XORSTR("Backtrack"), &Settings::LagComp::enabled);
+			    	ImGui::SliderFloat(XORSTR("##TRACKTIME"), &Settings::LagComp::time, 0.0f, 0.2f);
 			}
 			ImGui::NextColumn();
 			{

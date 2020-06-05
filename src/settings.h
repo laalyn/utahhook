@@ -785,232 +785,237 @@ namespace Settings
 	namespace ESP
 	{
 		inline bool enabled = false;
-        inline DrawingBackend backend = DrawingBackend::IMGUI;
+        	inline DrawingBackend backend = DrawingBackend::IMGUI;
 		inline ButtonCode_t key = ButtonCode_t::KEY_Z;
 		inline TeamColorType teamColorType = TeamColorType::RELATIVE;
-        inline HealthColorVar enemyColor = ImColor(255, 0, 0, 255);
-        inline HealthColorVar enemyVisibleColor = ImColor(255, 255, 0, 255);
-        inline HealthColorVar allyColor = ImColor(0, 0, 255, 255);
-        inline HealthColorVar allyVisibleColor = ImColor(0, 255, 0, 255);
-        inline HealthColorVar tColor = ImColor(255, 0, 0, 255);
-        inline HealthColorVar tVisibleColor = ImColor(255, 255, 0, 255);
-        inline HealthColorVar ctColor = ImColor(0, 0, 255, 255);
-        inline HealthColorVar ctVisibleColor = ImColor(0, 255, 0, 255);
-        inline HealthColorVar localplayerColor = ImColor(0, 255, 255, 255);
-        inline ColorVar bombColor = ImColor(156, 39, 176, 255);
-        inline ColorVar bombDefusingColor = ImColor(213, 0, 249, 255);
-        inline ColorVar hostageColor = ImColor(121, 85, 72, 255);
-        inline ColorVar defuserColor = ImColor(49, 27, 146, 255);
-        inline ColorVar weaponColor = ImColor(158, 158, 158, 255);
-        inline ColorVar chickenColor = ImColor(255, 193, 7, 255);
-        inline ColorVar fishColor = ImColor(255, 255, 255, 255);
-        inline ColorVar smokeColor = ImColor(97, 97, 97, 255);
-        inline ColorVar decoyColor = ImColor(2255, 152, 0, 255);
-        inline ColorVar flashbangColor = ImColor(255, 235, 59, 255);
-        inline ColorVar grenadeColor = ImColor(244, 67, 54, 255);
-        inline ColorVar molotovColor = ImColor(205, 32, 31, 255);
-        inline ColorVar mineColor = ImColor(205, 32, 31, 255);
-        inline ColorVar chargeColor = ImColor(205, 32, 31, 255);
-        inline ColorVar allyInfoColor = ImColor(255, 255, 255, 255);
-        inline ColorVar enemyInfoColor = ImColor(255, 255, 255, 255);
+        	inline HealthColorVar enemyColor = ImColor(255, 0, 0, 255);
+        	inline HealthColorVar enemyVisibleColor = ImColor(255, 255, 0, 255);
+        	inline HealthColorVar allyColor = ImColor(0, 0, 255, 255);
+        	inline HealthColorVar allyVisibleColor = ImColor(0, 255, 0, 255);
+        	inline HealthColorVar tColor = ImColor(255, 0, 0, 255);
+        	inline HealthColorVar tVisibleColor = ImColor(255, 255, 0, 255);
+        	inline HealthColorVar ctColor = ImColor(0, 0, 255, 255);
+        	inline HealthColorVar ctVisibleColor = ImColor(0, 255, 0, 255);
+        	inline HealthColorVar localplayerColor = ImColor(0, 255, 255, 255);
+        	inline ColorVar bombColor = ImColor(156, 39, 176, 255);
+        	inline ColorVar bombDefusingColor = ImColor(213, 0, 249, 255);
+        	inline ColorVar hostageColor = ImColor(121, 85, 72, 255);
+        	inline ColorVar defuserColor = ImColor(49, 27, 146, 255);
+        	inline ColorVar weaponColor = ImColor(158, 158, 158, 255);
+        	inline ColorVar chickenColor = ImColor(255, 193, 7, 255);
+        	inline ColorVar fishColor = ImColor(255, 255, 255, 255);
+        	inline ColorVar smokeColor = ImColor(97, 97, 97, 255);
+        	inline ColorVar decoyColor = ImColor(2255, 152, 0, 255);
+        	inline ColorVar flashbangColor = ImColor(255, 235, 59, 255);
+        	inline ColorVar grenadeColor = ImColor(244, 67, 54, 255);
+        	inline ColorVar molotovColor = ImColor(205, 32, 31, 255);
+        	inline ColorVar mineColor = ImColor(205, 32, 31, 255);
+        	inline ColorVar chargeColor = ImColor(205, 32, 31, 255);
+        	inline ColorVar allyInfoColor = ImColor(255, 255, 255, 255);
+        	inline ColorVar enemyInfoColor = ImColor(255, 255, 255, 255);
 
-		namespace Glow
-		{
-			inline bool enabled = false;
-            inline HealthColorVar allyColor = ImColor(0, 0, 255, 255);
-            inline HealthColorVar enemyColor = ImColor(255, 0, 0, 255);
-            inline HealthColorVar enemyVisibleColor = ImColor(255, 255, 0, 255);
-            inline HealthColorVar localplayerColor = ImColor(0, 255, 255, 255);
-            inline ColorVar weaponColor = ImColor(158, 158, 158, 255);
-            inline ColorVar grenadeColor = ImColor(96, 125, 139, 255);
-            inline ColorVar defuserColor = ImColor(49, 27, 146, 255);
-            inline ColorVar chickenColor = ImColor(255, 193, 7, 255);
-		}
-
-		namespace Filters
-		{
-			inline bool legit = false;
-			inline bool visibilityCheck = false;
-			inline bool smokeCheck = false;
-			//inline bool flashCheck = false;
-			inline bool enemies = false;
-			inline bool allies = false;
-			inline bool bomb = false;
-			inline bool hostages = false;
-			inline bool defusers = false;
-			inline bool weapons = false;
-			inline bool chickens = false;
-			inline bool fishes = false;
-			inline bool throwables = false;
-			inline bool localplayer = false;
-		}
-
-		namespace Info
-		{
-			inline bool name = false;
-			inline bool clan = false;
-			inline bool steamId = false;
-			inline bool rank = false;
-			inline bool health = false;
-			inline bool armor = false;
-			inline bool weapon = false;
-			inline bool scoped = false;
-			inline bool reloading = false;
-			inline bool flashed = false;
-			inline bool planting = false;
-			inline bool hasDefuser = false;
-			inline bool defusing = false;
-			inline bool grabbingHostage = false;
-			inline bool rescuing = false;
-			inline bool location = false;
-			inline bool money = false;
-		}
-
-		namespace Skeleton
-		{
-			inline bool enabled = false;
-            inline ColorVar allyColor = ImColor(255, 255, 255, 255);
-            inline ColorVar enemyColor = ImColor(255, 255, 255, 255);
-		}
-
-		namespace Boxes
-		{
-			inline bool enabled = false;
-			inline BoxType type = BoxType::FRAME_2D;
-		}
-
-		namespace Sprite
-		{
-			inline bool enabled = false;
-			inline SpriteType type = SpriteType::SPRITE_TUX;
-		}
-
-		namespace Bars
-		{
-			inline bool enabled = false;
-			inline BarType type = BarType::HORIZONTAL;
-			inline BarColorType colorType = BarColorType::HEALTH_BASED;
-		}
-
-		namespace Tracers
-		{
-			inline bool enabled = false;
-			inline TracerType type = TracerType::BOTTOM;
-		}
-
-		namespace BulletTracers
-		{
-			inline bool enabled = false;
-		}
-
-		namespace Bomb
-		{
-			inline bool enabled = false;
-		}
-
-		namespace FOVCrosshair
-		{
-			inline bool enabled = false;
-			inline bool filled = false;
-			inline ColorVar color = ImColor(255, 0, 0, 255);
-		}
-
-		namespace Chams
-		{
-			inline bool enabled = false;
-            inline HealthColorVar allyColor = ImColor(0, 0, 255, 255);
-            inline HealthColorVar allyVisibleColor = ImColor(0, 255, 0, 255);
-            inline HealthColorVar enemyColor = ImColor(255, 0, 0, 255);
-            inline HealthColorVar enemyVisibleColor = ImColor(255, 255, 0, 255);
-            inline HealthColorVar localplayerColor = ImColor(0, 255, 255, 255);
-			inline HealthColorVar FakeColor = ImColor(124,145,25,255);
-			inline ChamsType type = ChamsType::CHAMS;
-
-			namespace Arms
+			namespace Glow
 			{
 				inline bool enabled = false;
-				inline ColorVar color = ImColor(255, 255, 255, 255);
-				inline ArmsType type = ArmsType::DEFAULT;
+        	    inline HealthColorVar allyColor = ImColor(0, 0, 255, 255);
+        	    inline HealthColorVar enemyColor = ImColor(255, 0, 0, 255);
+        	    inline HealthColorVar enemyVisibleColor = ImColor(255, 255, 0, 255);
+        	    inline HealthColorVar localplayerColor = ImColor(0, 255, 255, 255);
+        	    inline ColorVar weaponColor = ImColor(158, 158, 158, 255);
+        	    inline ColorVar grenadeColor = ImColor(96, 125, 139, 255);
+        	    inline ColorVar defuserColor = ImColor(49, 27, 146, 255);
+        	    inline ColorVar chickenColor = ImColor(255, 193, 7, 255);
 			}
 
-			namespace Weapon
+			namespace Filters
+			{
+				inline bool legit = false;
+				inline bool visibilityCheck = false;
+				inline bool smokeCheck = false;
+				//inline bool flashCheck = false;
+				inline bool enemies = false;
+				inline bool allies = false;
+				inline bool bomb = false;
+				inline bool hostages = false;
+				inline bool defusers = false;
+				inline bool weapons = false;
+				inline bool chickens = false;
+				inline bool fishes = false;
+				inline bool throwables = false;
+				inline bool localplayer = false;
+			}
+
+			namespace Info
+			{
+				inline bool name = false;
+				inline bool clan = false;
+				inline bool steamId = false;
+				inline bool rank = false;
+				inline bool health = false;
+				inline bool armor = false;
+				inline bool weapon = false;
+				inline bool scoped = false;
+				inline bool reloading = false;
+				inline bool flashed = false;
+				inline bool planting = false;
+				inline bool hasDefuser = false;
+				inline bool defusing = false;
+				inline bool grabbingHostage = false;
+				inline bool rescuing = false;
+				inline bool location = false;
+				inline bool money = false;
+			}
+
+			namespace Skeleton
 			{
 				inline bool enabled = false;
-				inline ColorVar color = ImColor( 255, 255, 255, 255 );
-				inline WeaponType type = WeaponType::DEFAULT;
+        	    inline ColorVar allyColor = ImColor(255, 255, 255, 255);
+        	    inline ColorVar enemyColor = ImColor(255, 255, 255, 255);
 			}
-		}
 
-		// sound esp
-		namespace Sounds
-		{
-			inline bool enabled = false;
-			inline int time = 1000;
-		}
+			namespace Boxes
+			{
+				inline bool enabled = false;
+				inline BoxType type = BoxType::FRAME_2D;
+			}
 
-		namespace Hitmarker
-		{
-			inline bool enabled = false;
-			inline bool enemies = false;
-			inline bool allies = false;
-			inline ColorVar color = ImColor(255, 0, 0, 255);
-			inline int duration = 2000;
-			inline int size = 16;
-			inline int innerGap = 5;
+			namespace Sprite
+			{
+				inline bool enabled = false;
+				inline SpriteType type = SpriteType::SPRITE_TUX;
+			}
 
-			namespace Damage
+			namespace Bars
+			{
+				inline bool enabled = false;
+				inline BarType type = BarType::HORIZONTAL;
+				inline BarColorType colorType = BarColorType::HEALTH_BASED;
+			}
+
+			namespace Tracers
+			{
+				inline bool enabled = false;
+				inline TracerType type = TracerType::BOTTOM;
+			}
+
+			namespace BulletTracers
 			{
 				inline bool enabled = false;
 			}
-			namespace Sounds {
+
+			namespace Bomb
+			{
 				inline bool enabled = false;
-				inline Sound sound = Sound::NONE;
 			}
-		}
 
-		namespace HeadDot
-		{
-			inline bool enabled = false;
-			inline float size = 2.0f;
-		}
+			namespace FOVCrosshair
+			{
+				inline bool enabled = false;
+				inline bool filled = false;
+				inline ColorVar color = ImColor(255, 0, 0, 255);
+			}
 
-		namespace Spread
-		{
-			inline bool enabled = false; // show current spread
-			inline bool spreadLimit = false; // show spreadLimit value
-			inline ColorVar color = ImColor(15, 200, 45, 255);
-			inline ColorVar spreadLimitColor = ImColor(20, 5, 150, 255);
-		}
+			namespace Chams
+			{
+				inline bool enabled = false;
+        	    inline HealthColorVar allyColor = ImColor(0, 0, 255, 255);
+        	    inline HealthColorVar allyVisibleColor = ImColor(0, 255, 0, 255);
+        	    inline HealthColorVar enemyColor = ImColor(255, 0, 0, 255);
+        	    inline HealthColorVar enemyVisibleColor = ImColor(255, 255, 0, 255);
+        	    inline HealthColorVar localplayerColor = ImColor(0, 255, 255, 255);
+				inline HealthColorVar FakeColor = ImColor(124,145,25,255);
+				inline ChamsType type = ChamsType::CHAMS;
 
-		namespace DangerZone
-		{
-			inline int drawDist = 2000;
-			inline bool drawDistEnabled = false;
-			inline bool upgrade = false;
-			inline bool lootcrate = false;
-			inline bool radarjammer = false;
-			inline bool barrel = false;
-			inline bool ammobox = false;
-			inline bool safe = false;
-			inline bool dronegun = false;
-			inline bool drone = false;
-			inline bool cash = false;
-			inline bool tablet = false;
-			inline bool healthshot = false;
-			inline bool melee = false;
-            inline ColorVar upgradeColor = ImColor(255, 0, 0, 255);
-            inline ColorVar lootcrateColor = ImColor(255, 0, 0, 255);
-            inline ColorVar radarjammerColor = ImColor(255, 0, 0, 255);
-            inline ColorVar barrelColor = ImColor(255, 0, 0, 255);
-            inline ColorVar ammoboxColor = ImColor(255, 0, 0, 255);
-            inline ColorVar safeColor = ImColor(255, 0, 0, 255);
-            inline ColorVar dronegunColor = ImColor(255, 0, 0, 255);
-            inline ColorVar droneColor = ImColor(255, 0, 0, 255);
-            inline ColorVar cashColor = ImColor(255, 0, 0, 255);
-            inline ColorVar tabletColor = ImColor(255, 0, 0, 255);
-            inline ColorVar healthshotColor = ImColor(255, 0, 0, 255);
-            inline ColorVar meleeColor = ImColor(255, 0, 0, 255);
-		}
+				namespace Arms
+				{
+					inline bool enabled = false;
+					inline ColorVar color = ImColor(255, 255, 255, 255);
+					inline ArmsType type = ArmsType::DEFAULT;
+				}
+
+				namespace Weapon
+				{
+					inline bool enabled = false;
+					inline ColorVar color = ImColor( 255, 255, 255, 255 );
+					inline WeaponType type = WeaponType::DEFAULT;
+				}
+			}
+
+			// sound esp
+			namespace Sounds
+			{
+				inline bool enabled = false;
+				inline int time = 1000;
+			}
+
+			namespace Hitmarker
+			{
+				inline bool enabled = false;
+				inline bool enemies = false;
+				inline bool allies = false;
+				inline ColorVar color = ImColor(255, 0, 0, 255);
+				inline int duration = 2000;
+				inline int size = 16;
+				inline int innerGap = 5;
+
+				namespace Damage
+				{
+					inline bool enabled = false;
+				}
+				namespace Sounds {
+					inline bool enabled = false;
+					inline Sound sound = Sound::NONE;
+				}
+			}
+
+			namespace HeadDot
+			{
+				inline bool enabled = false;
+				inline float size = 2.0f;
+			}
+
+			namespace Backtrack
+			{
+				inline bool enabled = false;
+			}
+
+			namespace Spread
+			{
+				inline bool enabled = false; // show current spread
+				inline bool spreadLimit = false; // show spreadLimit value
+				inline ColorVar color = ImColor(15, 200, 45, 255);
+				inline ColorVar spreadLimitColor = ImColor(20, 5, 150, 255);
+			}
+
+			namespace DangerZone
+			{
+				inline int drawDist = 2000;
+				inline bool drawDistEnabled = false;
+				inline bool upgrade = false;
+				inline bool lootcrate = false;
+				inline bool radarjammer = false;
+				inline bool barrel = false;
+				inline bool ammobox = false;
+				inline bool safe = false;
+				inline bool dronegun = false;
+				inline bool drone = false;
+				inline bool cash = false;
+				inline bool tablet = false;
+				inline bool healthshot = false;
+				inline bool melee = false;
+        	    inline ColorVar upgradeColor = ImColor(255, 0, 0, 255);
+        	    inline ColorVar lootcrateColor = ImColor(255, 0, 0, 255);
+        	    inline ColorVar radarjammerColor = ImColor(255, 0, 0, 255);
+        	    inline ColorVar barrelColor = ImColor(255, 0, 0, 255);
+        	    inline ColorVar ammoboxColor = ImColor(255, 0, 0, 255);
+        	    inline ColorVar safeColor = ImColor(255, 0, 0, 255);
+        	    inline ColorVar dronegunColor = ImColor(255, 0, 0, 255);
+        	    inline ColorVar droneColor = ImColor(255, 0, 0, 255);
+        	    inline ColorVar cashColor = ImColor(255, 0, 0, 255);
+        	    inline ColorVar tabletColor = ImColor(255, 0, 0, 255);
+        	    inline ColorVar healthshotColor = ImColor(255, 0, 0, 255);
+        	    inline ColorVar meleeColor = ImColor(255, 0, 0, 255);
+			}
 	}
 
 	namespace MaterialConfig {
@@ -1091,6 +1096,12 @@ namespace Settings
 	namespace NoDuckCooldown
 	{
 		inline bool enabled = false;
+	}
+
+	namespace LagComp
+	{
+		inline bool enabled = false;
+		inline float time = 0.2f;
 	}
 
 	namespace AutoStrafe
