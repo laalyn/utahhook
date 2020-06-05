@@ -152,7 +152,6 @@ To add a config, copy the folder containing it to `~/.config/MissedIT/CSGO`
 ![esp](Pictures/Screenshot3.png)
 ![Misc](Pictures/Screenshot4.png)
 
-
 ## Credits
 
 Special thanks to the Original AimTux project: [https://github.com/AimTuxOfficial/AimTux](https://github.com/AimTuxOfficial/AimTux).

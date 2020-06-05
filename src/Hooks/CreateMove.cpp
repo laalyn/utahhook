@@ -10,6 +10,11 @@
 #include "../Hacks/showranks.h"
 #include "../Hacks/autodefuse.h"
 #include "../Hacks/jumpthrow.h"
+#include "../Hacks/clantagchanger.h"
+#include "../Hacks/edgejump.h"
+#include "../Hacks/esp.h"
+#include "../Hacks/fakeduck.h"
+#include "../Hacks/fakelag.h"
 #include "../Hacks/grenadehelper.h"
 #include "../Hacks/grenadeprediction.h"
 #include "../Hacks/edgejump.h"
@@ -72,6 +77,7 @@ bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
 			TracerEffect::CreateMove(cmd);
 			RagdollGravity::CreateMove(cvar);
 		PredictionSystem::EndPrediction();
+		FakeDuck::CreateMove(cmd);
 
 		EdgeJump::PostPredictionCreateMove(cmd);
 		NoFall::PostPredictionCreateMove(cmd);

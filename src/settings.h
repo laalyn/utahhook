@@ -184,6 +184,12 @@ enum class AntiAimType_X : int
     ANGEL_UP,
 };
 
+enum class FakeDuckType : int 
+{
+	HOLD,
+	TOGGLE,
+};
+
 struct AimbotWeapon_t
 {
 	bool silent,
@@ -762,6 +768,13 @@ namespace Settings
             inline float offset = 180.0f;
         }
     }
+
+	namespace FakeDuck
+	{
+		inline bool enabled = false;
+		inline ButtonCode_t key = ButtonCode_t::KEY_C;
+		inline FakeDuckType type = FakeDuckType::HOLD;
+	}
 
 	namespace Resolver
 	{

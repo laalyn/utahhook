@@ -584,6 +584,9 @@ void Settings::LoadDefaultsOrSave(std::string path)
     settings[XORSTR("FakeLag")][XORSTR("value")] = Settings::FakeLag::value;
     settings[XORSTR("FakeLag")][XORSTR("adaptive")] = Settings::FakeLag::adaptive;
 
+    settings[XORSTR("FakeDuck")][XORSTR("enabled")] = Settings::FakeDuck::enabled;
+    settings[XORSTR("FakeDuck")][XORSTR("key")] = Settings::FakeDuck::key;
+
     settings[XORSTR("AutoAccept")][XORSTR("enabled")] = Settings::AutoAccept::enabled;
 
     settings[XORSTR("NoSky")][XORSTR("enabled")] = Settings::NoSky::enabled;
@@ -1197,6 +1200,8 @@ void Settings::LoadConfig(std::string path)
     GetVal(settings[XORSTR("ClanTagChanger")][XORSTR("animation_speed")], &Settings::ClanTagChanger::animationSpeed);
     GetVal(settings[XORSTR("ClanTagChanger")][XORSTR("type")], (int*)&Settings::ClanTagChanger::type);
     ::ClanTagChanger::UpdateClanTagCallback();
+	GetVal(settings[XORSTR("FakeDuck")][XORSTR("enabled")], &Settings::FakeDuck::enabled);
+	GetButtonCode(settings[XORSTR("FakeDuck")][XORSTR("key")], &Settings::FakeDuck::key);
 
     GetVal(settings[XORSTR("View")][XORSTR("NoViewPunch")][XORSTR("enabled")], &Settings::View::NoViewPunch::enabled);
     GetVal(settings[XORSTR("View")][XORSTR("NoAimPunch")][XORSTR("enabled")], &Settings::View::NoAimPunch::enabled);

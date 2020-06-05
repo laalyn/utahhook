@@ -32,6 +32,7 @@ void Misc::RenderTab()
 	const char* grenadeTypes[] = { "FLASH", "SMOKE", "MOLOTOV", "HEGRENADE" };
 	const char* throwTypes[] = { "NORMAL", "RUN", "JUMP", "WALK" };
 	const char* angleTypes[] = { "Real", "Fake" };
+	const char *fakeDuckTypes[] = {"HOLD", "TOGGLE"};
 
 	ImGui::Columns(2, nullptr, true);
 	{
@@ -448,6 +449,9 @@ void Misc::RenderTab()
 				ImGui::Checkbox(XORSTR("Attempt NoFall"), &Settings::NoFall::enabled);
 				ImGui::Checkbox(XORSTR("Ragdoll Gravity"), &Settings::RagdollGravity::enabled);
 				ImGui::Checkbox(XORSTR("Show Spectator list"), &Settings::ShowSpectators::enabled);
+			    	ImGui::Checkbox(XORSTR("Fake Duck"), &Settings::FakeDuck::enabled);
+				UI::KeyBindButton(&Settings::FakeDuck::key);
+				ImGui::Combo(XORSTR("##FAKEDUCKTYPE"), (int *)&Settings::FakeDuck::type, fakeDuckTypes, IM_ARRAYSIZE(fakeDuckTypes));
 			}
 			ImGui::Columns(1);
 			ImGui::Separator();
