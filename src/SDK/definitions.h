@@ -3,11 +3,9 @@
 // Uncomment to enable buggy/experimental settings.
 //#define EXPERIMENTAL_SETTINGS
 
-#include "vector.h"
-#include <map>
-#include <string>
 #include <unordered_map>
 #include <map>
+#include <string>
 #include "vector.h"
 
 /* generic constants */

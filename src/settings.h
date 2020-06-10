@@ -14,7 +14,7 @@
 #include "SDK/Materialsystem_config.h"
 
 enum class DamagePrediction : int {
-	safety = 0,
+	justDamage = 0,
 	damage,
 
 };
@@ -309,7 +309,7 @@ struct RagebotWeapon_t
 		  visibleDamage = 50.f,
 		  HitChance = 20.f,
 		  HitchanceOverwrriteValue = 1.f;
-	DamagePrediction DmagePredictionType = DamagePrediction::safety;
+	DamagePrediction DmagePredictionType = DamagePrediction::damage;
 	EnemySelectionType enemySelectionType = EnemySelectionType::CLosestToCrosshair;
 	bool desiredBones[31];
 	
@@ -628,7 +628,7 @@ namespace Settings
         inline bool friendly = false;
 		inline bool DoubleFire = false;
 
-		inline DamagePrediction damagePrediction = DamagePrediction::safety;
+		inline DamagePrediction damagePrediction = DamagePrediction::damage;
 		inline EnemySelectionType enemySelectionType = EnemySelectionType::CLosestToCrosshair;
 
 		namespace AutoAim

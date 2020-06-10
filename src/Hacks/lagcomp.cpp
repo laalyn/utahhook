@@ -1,118 +1,56 @@
-// #include "lagcomp.h"
-//
-// #include "../Utils/math.h"
-// #include "../interfaces.h"
-// #include "../settings.h"
-//
-// std::vector<LagComp::LagCompFrameInfo> LagComp::lagCompFrames;
-//
-// void RemoveInvalidTicks()
-// {
-//     while (LagComp::lagCompFrames.size() > 24)
-// 	LagComp::lagCompFrames.pop_back();
-// }
-//
-// void RegisterTicks()
-// {
-//     const auto curframe = LagComp::lagCompFrames.insert(LagComp::lagCompFrames.begin(), { globalVars->tickcount, globalVars->curtime });
-//     const auto localplayer = (C_BasePlayer*)entityList->GetClientEntity(engine->GetLocalPlayer());
-//
-//     for (int i = 1; i < engine->GetMaxClients(); ++i)
-//     {
-// 	const auto player = (C_BasePlayer*)entityList->GetClientEntity(i);
-//
-// 	if (!player
-// 	    || player == localplayer
-// 	    || player->GetDormant()
-// 	    || !player->GetAlive()
-// 	    || Entity::IsTeamMate(player, localplayer)
-// 	    || player->GetImmune())
-// 	    continue;
-//
-// 	LagComp::LagCompRecord record;
-//
-// 	record.entity = player;
-// 	record.origin = player->GetVecOrigin();
-// 	record.head = player->GetBonePosition(BONE_HEAD);
-//
-// 	if (player->SetupBones(record.bone_matrix, 128, BONE_USED_BY_HITBOX, globalVars->curtime))
-// 	    curframe->records.push_back(record);
-//     }
-// }
-//
-// void LagComp::CreateMove(CUserCmd* cmd)
-// {
-//     if (!Settings::LagComp::enabled)
-// 	return;
-//
-//     RemoveInvalidTicks();
-//     RegisterTicks();
-//
-//     C_BasePlayer* localplayer = (C_BasePlayer*)entityList->GetClientEntity(engine->GetLocalPlayer());
-//
-//     if (!localplayer || !localplayer->GetAlive())
-// 	return;
-//
-//     float serverTime = localplayer->GetTickBase() * globalVars->interval_per_tick;
-//     const auto weapon = (C_BaseCombatWeapon*)entityList->GetClientEntityFromHandle(localplayer->GetActiveWeapon());
-//
-//     QAngle my_angle;
-//     engine->GetViewAngles(my_angle);
-//     QAngle my_angle_rcs = my_angle + *localplayer->GetAimPunchAngle();
-//
-//     if (cmd->buttons & IN_ATTACK && weapon->GetNextPrimaryAttack() <= serverTime)
-//     {
-// 	float fov = Settings::Ragebot::AutoAim::fov * 2;
-//
-// 	int tickcount = 0;
-// 	bool has_target = false;
-//
-// 	for (auto&& frame : LagComp::lagCompFrames)
-// 	{
-// 	    for (auto& record : frame.records)
-// 	    {
-// 		float tmpFOV = Math::GetFov(
-// 		    my_angle_rcs,
-// 		    Math::CalcAngle(localplayer->GetEyePosition(), record.head));
-//
-// 		if (tmpFOV < fov)
-// 		{
-// 		    fov = tmpFOV;
-// 		    tickcount = frame.tickCount;
-// 		    has_target = true;
-// 		}
-// 	    }
-// 	}
-//
-// 	if (has_target)
-// 	{
-// 	    cmd->tick_count = tickcount;
-// 	}
-//     }
-// }
-
-
 #include "lagcomp.h"
 
-#include "../Utils/bonemaps.h"
 #include "../Utils/math.h"
 #include "../interfaces.h"
 #include "../settings.h"
 
+// source from nimbus bcz i am lezy xd
+#ifndef CLAMP
+    #define CLAMP(x, upper, lower) (std::min(upper, std::max(x, lower)))
+#endif
+
 std::vector<LagComp::LagCompTickInfo> LagComp::lagCompTicks;
 
-// Checks the validity of a recorded tick in the specified time.
-static bool IsTickValid(float time)
-{
-    float deltaTime = globalVars->curtime - time;
 
-    if (fabsf(deltaTime) < Settings::LagComp::time)
+static float GetLerpTime()
+{
+	int updateRate = cvar->FindVar("cl_updaterate")->GetInt();
+	ConVar *minUpdateRate = cvar->FindVar("sv_minupdaterate");
+	ConVar *maxUpdateRate = cvar->FindVar("sv_maxupdaterate");
+
+	if (minUpdateRate && maxUpdateRate)
+		updateRate = maxUpdateRate->GetInt();
+
+	float ratio = cvar->FindVar("cl_interp_ratio")->GetFloat();
+
+	if (ratio == 0)
+		ratio = 1.0f;
+
+	float lerp = cvar->FindVar("cl_interp")->GetFloat();
+	ConVar *c_min_ratio = cvar->FindVar("sv_client_min_interp_ratio");
+	ConVar *c_max_ratio = cvar->FindVar("sv_client_max_interp_ratio");
+
+	if (c_min_ratio && c_max_ratio && c_min_ratio->GetFloat() != 1)
+		ratio = CLAMP(ratio, c_min_ratio->GetFloat(), c_max_ratio->GetFloat());
+
+	return std::max(lerp, (ratio / updateRate));
+}
+
+static bool IsTickValid(float time) // pasted from polak getting some invalid ticks need some fix
+{
+	float correct = 0;
+
+	correct += GetLerpTime();
+	correct = CLAMP(correct, 0.f, cvar->FindVar("sv_maxunlag")->GetFloat());
+
+	float deltaTime = correct - (globalVars->curtime - time);
+
+	if (fabsf(deltaTime) < 0.2f)
 	return true;
 
     return false;
 }
 
-// Removes the ticks which were found invalid.
 static void RemoveInvalidTicks()
 {
     auto &records = LagComp::lagCompTicks;
@@ -131,49 +69,45 @@ static void RemoveInvalidTicks()
     }
 }
 
-// Adds the valid tick to the tick record vector.
-static void RegisterTicks(C_BasePlayer *localplayer)
+static void RegisterTicks()
 {
-    const auto curtick = LagComp::lagCompTicks.insert(LagComp::lagCompTicks.begin(), {globalVars->tickcount, globalVars->curtime});
+	const auto localplayer = (C_BasePlayer *)entityList->GetClientEntity(engine->GetLocalPlayer());
+	const auto curTick = LagComp::lagCompTicks.insert(LagComp::lagCompTicks.begin(), {globalVars->tickcount, globalVars->curtime});
 
-    for (int i = 1; i < engine->GetMaxClients(); ++i)
+	for (int i = engine->GetMaxClients(); i > 1 ; i--)
     {
-	C_BasePlayer *player = (C_BasePlayer *)entityList->GetClientEntity(i);
+		const auto player = (C_BasePlayer *)entityList->GetClientEntity(i);
 
 	if (!player || player == localplayer || player->GetDormant() || !player->GetAlive() || Entity::IsTeamMate(player, localplayer) || player->GetImmune())
 	    continue;
 
 	LagComp::LagCompRecord record;
 
-	const std::unordered_map<int, int> *modelType = BoneMaps::GetModelTypeBoneMap(player);
-
 	record.entity = player;
 	record.origin = player->GetVecOrigin();
-	record.head = player->GetBonePosition((*modelType).at(BONE_HEAD));
+		record.head = player->GetBonePosition(BONE_HEAD);
 
 	if (player->SetupBones(record.bone_matrix, 128, BONE_USED_BY_HITBOX, globalVars->curtime))
-	    curtick->records.push_back(record);
+			curTick->records.push_back(record);
     }
 }
 
-// Runs the lag compensation/backtrack process every tick.
 void LagComp::CreateMove(CUserCmd *cmd)
 {
-    if (!Settings::LagComp::enabled)
-	return;
+	// if (!Settings::LagComp::enabled)
+	// 	return;
+
+	RemoveInvalidTicks();
+	RegisterTicks();
 
     C_BasePlayer *localplayer = (C_BasePlayer *)entityList->GetClientEntity(engine->GetLocalPlayer());
+	C_BaseCombatWeapon *weapon = (C_BaseCombatWeapon *)entityList->GetClientEntityFromHandle(localplayer->GetActiveWeapon());
 
     if (!localplayer || !localplayer->GetAlive())
 	return;
 
-    C_BaseCombatWeapon *weapon = (C_BaseCombatWeapon *)entityList->GetClientEntityFromHandle(localplayer->GetActiveWeapon());
-
     if (!weapon)
 	return;
-
-    RemoveInvalidTicks();
-    RegisterTicks(localplayer);
 
     float serverTime = localplayer->GetTickBase() * globalVars->interval_per_tick;
 
@@ -183,21 +117,21 @@ void LagComp::CreateMove(CUserCmd *cmd)
 
     if (cmd->buttons & IN_ATTACK && weapon->GetNextPrimaryAttack() <= serverTime)
     {
-	float fov = FLT_MAX;
+		float fov = 180.0f;
 
 	int tickcount = 0;
 	bool has_target = false;
 
-	for (auto &tick : LagComp::lagCompTicks)
+		for (auto &&Tick : LagComp::lagCompTicks)
 	{
-	    for (auto &record : tick.records)
+			for (auto &record : Tick.records)
 	    {
 		float tmpFOV = Math::GetFov(rcsAngle, Math::CalcAngle(localplayer->GetEyePosition(), record.head));
 
 		if (tmpFOV < fov)
 		{
 		    fov = tmpFOV;
-		    tickcount = tick.tickCount;
+					tickcount = Tick.tickCount;
 		    has_target = true;
 		}
 	    }

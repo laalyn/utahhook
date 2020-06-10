@@ -1,3 +1,4 @@
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
 // dear imgui, v1.63 WIP
 // (internals)
 

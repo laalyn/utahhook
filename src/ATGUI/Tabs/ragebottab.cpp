@@ -11,7 +11,7 @@
 #pragma GCC diagnostic ignored "-Wformat-security"
 
 static ItemDefinitionIndex currentWeapon = ItemDefinitionIndex::INVALID;
-static DamagePrediction damagePrediction = DamagePrediction::safety;
+static DamagePrediction damagePrediction = DamagePrediction::justDamage;
 static EnemySelectionType enemySelectionType = EnemySelectionType::CLosestToCrosshair;
 
 //static bool enabled = false;
@@ -66,6 +66,8 @@ void UI::ReloadRageWeaponSettings()
 
 	for (int bone = BONE_PELVIS; bone <= BONE_RIGHT_SOLE; bone++)
 		desiredBones[bone] = Settings::Ragebot::weapons.at(index).desiredBones[bone];
+
+	Ragebot::UpdateValues();
 }
 
 void UI::UpdateRageWeaponSettings()
@@ -108,6 +110,7 @@ void UI::UpdateRageWeaponSettings()
 	{
 		Settings::Ragebot::weapons.erase(currentWeapon);
 		UI::ReloadRageWeaponSettings();
+		return;
 	}
 }
 

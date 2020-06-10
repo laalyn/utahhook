@@ -329,7 +329,7 @@ void AntiAim::CreateMove(CUserCmd* cmd)
         }
     }
 
-    if (cmd->buttons & IN_USE || cmd->buttons & IN_ATTACK || (cmd->buttons & IN_ATTACK2 && *activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_REVOLVER || *activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_KNIFE ) && !Ragebot::coacking == true)
+    if (cmd->buttons & IN_USE || cmd->buttons & IN_ATTACK || ((cmd->buttons & IN_ATTACK2 && *activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_REVOLVER) || (*activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_KNIFE )))
     {
         AntiAim::realAngle = AntiAim::fakeAngle = angle;
         return;
