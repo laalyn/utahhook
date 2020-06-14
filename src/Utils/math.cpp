@@ -34,6 +34,18 @@ void Math::AngleVectors(const QAngle &angles, Vector& forward)
 	forward.z = -sp;
 }
 
+void Math::AngleVectors(const Vector &angles, Vector& forward)
+{
+    float sp, sy, cp, cy;
+
+    Math::SinCos(DEG2RAD(angles[YAW]), &sy, &cy);
+    Math::SinCos(DEG2RAD(angles[PITCH]), &sp, &cp);
+
+    forward.x = cp * cy;
+    forward.y = cp * sy;
+    forward.z = -sp;
+}
+
 void Math::VectorRotate(const float *in1, const matrix3x4_t& in2, float *out)
 {
     out[0] = Math::DotProduct(in1, in2[0]);
@@ -77,6 +89,26 @@ void Math::AngleVectors( const Vector& angles, Vector* forward, Vector* right, V
 		up->z = cr * cp;
 	}
 }
+
+void Math::AngleVectors(const Vector& angles, Vector& forward, Vector& right, Vector& up)
+{
+    float sr, sp, sy, cr, cp, cy;
+
+    SinCos( DEG2RAD( angles[1] ), &sy, &cy );
+    SinCos( DEG2RAD( angles[0] ), &sp, &cp );
+    SinCos( DEG2RAD( angles[2] ), &sr, &cr );
+
+    forward.x = (cp * cy);
+    forward.y = (cp * sy);
+    forward.z = (-sp);
+    right.x = (-1 * sr * sp * cy + -1 * cr * -sy);
+    right.y = (-1 * sr * sp * sy + -1 * cr * cy);
+    right.z = (-1 * sr * cp);
+    up.x = (cr * sp * cy + -sr * -sy);
+    up.y = (cr * sp * sy + -sr * cy);
+    up.z = (cr * cp);
+}
+
 
 void Math::NormalizeAngles(QAngle& angle)
 {
@@ -244,7 +276,7 @@ float Math::CalMaxDistance(const QAngle &src, const Vector &dest)
 			XDistance = src.x - dest.x, 
 			tempdistance;
 
-	return tempdistance = Math::SquareRoot( square(Ydistance) + square(ZDistance) );
+	tempdistance = Math::SquareRoot( square(Ydistance) + square(ZDistance) );
 	return Math::SquareRoot( square(tempdistance) + square(XDistance) );
 }
 void Math::AngleMatrix(const Vector angles, matrix3x4_t& matrix)

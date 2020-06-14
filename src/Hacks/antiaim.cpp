@@ -6,6 +6,7 @@
 #include "../Utils/math.h"
 #include "../Utils/entity.h"
 #include "../interfaces.h"
+#include "../Utils/xorstring.h"
 #include "valvedscheck.h"
 #include "ragebot.h"
 
@@ -298,11 +299,17 @@ static void DoManuaAntiAim()
 }
 void AntiAim::CreateMove(CUserCmd* cmd)
 {
+    if (Settings::AntiAim::RageAntiAim::overrideByHC)
+	cvar->ConsoleDPrintf(XORSTR("== OVERRIDE AA == \n\n"));
+
     if (!Settings::AntiAim::Yaw::enabled && !Settings::AntiAim::Pitch::enabled && !Settings::AntiAim::LBYBreaker::enabled && !Settings::AntiAim::LegitAntiAim::enable && !Settings::AntiAim::ManualAntiAim::Enable)
         return;
 
     if (Settings::Legitbot::AimStep::enabled && Legitbot::aimStepInProgress)
         return;
+
+    if (Settings::AntiAim::RageAntiAim::overrideByHC)
+	return;
 
     QAngle oldAngle = cmd->viewangles;
     float oldForward = cmd->forwardmove;

@@ -9,10 +9,12 @@
 #include "../Utils/math.h"
 #include "../Utils/xorstring.h"
 #include "backtrack.h"
+#include "../interfaces.h"
 
 #include <thread>
 #include <iostream>
 #include <stdlib.h>
+#include <random>
 
 #define PI_F (3.14)
 #define absolute(x) ( x = x < 0 ? x * -1 : x)
@@ -612,19 +614,162 @@ static C_BasePlayer* GetBestEnemyAndSpot(CUserCmd* cmd,C_BasePlayer* localplayer
 }
 
 //Hitchance source from nanoscence
-static float Ragebothitchance(C_BasePlayer* localplayer, C_BaseCombatWeapon* activeWeapon)
+// static float Ragebothitchance(C_BasePlayer* localplayer, C_BaseCombatWeapon* activeWeapon)
+// {
+//     float hitchance = 10;
+//     activeWeapon->UpdateAccuracyPenalty();
+//     if (activeWeapon)
+//     {
+// 	float inaccuracy = activeWeapon->GetInaccuracy();
+// 	if (inaccuracy == 0) inaccuracy = 0.0000001;
+// 	hitchance = 1 / inaccuracy;
+//
+// 	return hitchance;
+//     }
+//     return hitchance;
+// }
+void NormalizeAngles( Vector& angles )
 {
-    float hitchance = 10;
-    activeWeapon->UpdateAccuracyPenalty();
-    if (activeWeapon)
-    {
-	float inaccuracy = activeWeapon->GetInaccuracy();
-	if (inaccuracy == 0) inaccuracy = 0.0000001;
-	hitchance = 1 / inaccuracy;
-
-	return hitchance;
+    for ( auto i = 0; i < 3; i++ ) {
+	while ( angles [ i ] < -180.0f ) angles [ i ] += 360.0f;
+	while ( angles [ i ] > 180.0f ) angles [ i ] -= 360.0f;
     }
-    return hitchance;
+}
+
+Vector CrossProduct(const Vector& a, const Vector& b)
+{
+    return Vector( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x );
+}
+
+void VectorAngles( Vector& forward, Vector& up, Vector& angles )
+{
+    Vector left = CrossProduct(up, forward );
+    left.NormalizeInPlace( );
+
+    float forwardDist = forward.Length2D( );
+
+    if ( forwardDist > 0.001f )
+    {
+	angles.x = atan2f( -forward.z, forwardDist ) * 180 / PI_F;
+	angles.y = atan2f( forward.y, forward.x ) * 180 / PI_F;
+
+	float upZ = (left.y * forward.x) - (left.x * forward.y);
+	angles.z = atan2f( left.z, upZ ) * 180 / PI_F;
+    }
+    else
+    {
+	angles.x = atan2f( -forward.z, forwardDist ) * 180 / PI_F;
+	angles.y = atan2f( -left.x, left.y ) * 180 / PI_F;
+	angles.z = 0;
+    }
+}
+
+
+float RandomFloat(float min, float max)
+{
+    static std::default_random_engine e;
+    static std::uniform_real_distribution<> dis(min, max);
+    return dis(e);
+
+}
+
+// hitchance from versas
+bool Ragebothitchance(C_BasePlayer* ent, C_BaseCombatWeapon* weapon, CUserCmd* cmd)
+{
+    if ( !weapon )
+	return false;
+
+    Settings::AntiAim::RageAntiAim::overrideByHC = true;
+
+    Vector forward, right, up;
+    Vector src = ent->GetEyePosition();
+    QAngle qangles = cmd->viewangles;
+    Vector angles;
+    angles.x = qangles.x;
+    angles.y = qangles.y;
+    angles.z = qangles.z;
+
+    cvar->ConsoleDPrintf(XORSTR("angles: {%d, %d, %d}\n"), angles.x, angles.y, up.z);
+    cvar->ConsoleDPrintf(XORSTR("forward: {%d, %d, %d}\n"), forward.x, forward.y, forward.z);
+    cvar->ConsoleDPrintf(XORSTR("right: {%d, %d, %d}\n"), right.x, right.y, right.z);
+    cvar->ConsoleDPrintf(XORSTR("up: {%d, %d, %d}\n"), up.x, up.y, up.z);
+
+    Math::AngleVectors( angles, forward, right, up );
+
+    Settings::AntiAim::RageAntiAim::overrideByHC = false;
+
+    int cHits = 0;
+    int cNeededHits = static_cast< int >(150.f * (Settings::Ragebot::HitChance::value / 100.f));
+
+    weapon->UpdateAccuracyPenalty( );
+    float weap_spread = weapon->GetSpread( );
+    float weap_inaccuracy = weapon->GetInaccuracy( );
+
+    cvar->ConsoleDPrintf(XORSTR("hitsTarget: %d "), cNeededHits);
+
+
+    for ( int i = 0; i < 150; i++ )
+    {
+
+	float a = RandomFloat( 0.f, 1.f );
+	float b = RandomFloat( 0.f, 2.f * PI_F );
+	float c = RandomFloat( 0.f, 1.f );
+	float d = RandomFloat( 0.f, 2.f * PI_F );
+
+	float inaccuracy = a * weap_inaccuracy;
+	float spread = c * weap_spread;
+
+	if (*weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_REVOLVER)
+	{
+	    a = 1.f - a * a;
+	    a = 1.f - c * c;
+	}
+
+	Vector spreadView( (cos( b ) * inaccuracy) + (cos( d ) * spread), (sin( b ) * inaccuracy) + (sin( d ) * spread), 0 ), direction;
+
+	direction.x = forward.x + (spreadView.x * right.x) + (spreadView.y * up.x);
+	direction.y = forward.y + (spreadView.x * right.y) + (spreadView.y * up.y);
+	direction.z = forward.z + (spreadView.x * right.z) + (spreadView.y * up.z);
+	direction.Normalize();
+
+	Vector viewAnglesSpread;
+	VectorAngles( direction, up, viewAnglesSpread );
+	NormalizeAngles( viewAnglesSpread );
+
+	Vector viewForward;
+	Math::AngleVectors( viewAnglesSpread, viewForward );
+	viewForward.NormalizeInPlace( );
+
+	viewForward = src + (viewForward * weapon->GetCSWpnData( )->GetRange());
+
+	Settings::AntiAim::RageAntiAim::overrideByHC = true;
+
+	trace_t tr;
+	Ray_t ray;
+
+
+	ray.Init( src, viewForward );
+
+	trace->ClipRayToEntity( ray, MASK_SHOT | CONTENTS_GRATE, ent, &tr );
+
+	Settings::AntiAim::RageAntiAim::overrideByHC = false;
+
+	if ( tr.m_pEntityHit == ent )
+	    ++cHits;
+
+	int sc = static_cast< int >((static_cast< float >(cHits) / 150.f) * 100.f);
+	if (sc > 0)
+	{
+	    cvar->ConsoleDPrintf(XORSTR("=========== hitchance: %d ==========="), sc);
+	}
+	cvar->ConsoleDPrintf(XORSTR("hits: %d "), cHits);
+	if ( static_cast< int >((static_cast< float >(cHits) / 150.f) * 100.f) >= Settings::Ragebot::HitChance::value )
+	    return true;
+
+	if ( (150 - i + cHits) < cNeededHits )
+	    return false;
+    }
+    return false;
 }
 
 static void RagebotNoRecoil(QAngle& angle, CUserCmd* cmd, C_BasePlayer* localplayer, C_BaseCombatWeapon* activeWeapon)
@@ -664,11 +809,11 @@ static void RagebotAutoSlow(C_BasePlayer* player,C_BasePlayer* localplayer, C_Ba
 
     if (activeWeapon->GetNextPrimaryAttack() > globalVars->curtime || !activeWeapon || activeWeapon->GetAmmo() == 0)
 	return;
-    float hc = Ragebothitchance(localplayer,activeWeapon);
-    if (Settings::Ragebot::HitChanceOverwrride::enable)
-	hc -= GetPercentVal(hc, Settings::Ragebot::HitChanceOverwrride::value);
+    bool hc = Ragebothitchance(localplayer, activeWeapon, cmd);
+//  if (Settings::Ragebot::HitChanceOverwrride::enable)
+//  	hc -= GetPercentVal(hc, Settings::Ragebot::HitChanceOverwrride::value);
 
-    if (hc < (Settings::Ragebot::HitChance::value * 1.5))
+    if (!hc)
     {
 	float curTime = globalVars->curtime;
 	QAngle ViewAngle = cmd->viewangles;
@@ -693,7 +838,7 @@ static void RagebotAutoSlow(C_BasePlayer* player,C_BasePlayer* localplayer, C_Ba
 	    sideMove = NewMove.y;
 	}
     }
-    else if ( hc == (Settings::Ragebot::HitChance::value * 1.5) )
+    else
     {
 	cmd->buttons = IN_WALK;
 	forrwordMove = 0;
@@ -749,10 +894,10 @@ static void RagebotAutoShoot(C_BasePlayer* player, C_BasePlayer* localplayer, C_
 	return; // continue next tick
     }
 
-    float hc = Ragebothitchance(localplayer, activeWeapon);
-    if (Settings::Ragebot::HitChanceOverwrride::enable)
-	hc -= GetPercentVal(hc, Settings::Ragebot::HitChanceOverwrride::value);
-    if ( hc < Settings::Ragebot::HitChance::value * 1.5)
+    bool hc = Ragebothitchance(localplayer, activeWeapon, cmd);
+//     if (Settings::Ragebot::HitChanceOverwrride::enable)
+// 	hc -= GetPercentVal(hc, Settings::Ragebot::HitChanceOverwrride::value);
+    if (!hc)
 	return;
 
     if (activeWeapon->GetNextPrimaryAttack() > globalVars->curtime)
@@ -776,12 +921,6 @@ static void FixMouseDeltas(CUserCmd* cmd,C_BasePlayer* player, const QAngle& ang
 
     cmd->mousedx = -delta.y / (m_yaw * sens * zoomMultiplier);
     cmd->mousedy = delta.x / (m_pitch * sens * zoomMultiplier);
-}
-
-static void doubleTap(C_BasePlayer* player, C_BasePlayer* localplayer, C_BaseCombatWeapon* activeweapon)
-{
-    //localplayer->cle
-    // engine->ClientCmd_Unrestricted()
 }
 
 void Ragebot::CreateMove(CUserCmd* cmd)

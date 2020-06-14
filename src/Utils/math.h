@@ -9,6 +9,8 @@ namespace Math {
 	void inline SinCos(float radians, float *sine, float *cosine);
 	void AngleVectors(const QAngle &angles, Vector &forward);
 	void AngleVectors( const Vector& angles, Vector* forward, Vector* right, Vector* up );
+	void AngleVectors(const Vector& angles, Vector& forward, Vector& right, Vector& up);
+	void AngleVectors(const Vector& angles, Vector& forward);
 	void NormalizeAngles(QAngle& angle);
 	void NormalizeYaw( float& yaw );
 	void ClampAngles(QAngle& angle);
@@ -30,4 +32,4 @@ namespace Math {
 	float CalMaxDistance(const QAngle &src, const Vector &dest);
 	float SquareRoot(const float &x);
 	// static void AngleMatrix(const Vector &angles, const Vector &position, matrix3x4_t& matrix_out);
-}
+	}

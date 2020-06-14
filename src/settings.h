@@ -728,6 +728,8 @@ namespace Settings
         namespace RageAntiAim
         {
             inline bool enable = false;
+	    // idk why
+	    inline bool overrideByHC = false;
         }
 
 		namespace LegitAntiAim 
