@@ -37,15 +37,21 @@ void FakeDuck::CreateMove(CUserCmd *cmd)
 
 	static bool pSwitch = false;
 	static int counter = 0;
+	static int altcounter = 0;
 
 	if (counter % 14 == 0)
 		pSwitch = true;
-	else if (counter % 14 == 6)
-		CreateMove::sendPacket = true;
 	else if (counter % 14 == 7)
 		pSwitch = false;
 
+	if (altcounter % 6 == 0) {
+	    CreateMove::sendPacket = true;
+	} else if (altcounter % 6 == 1) {
+	    CreateMove::sendPacket = false;
+	}
+
 	counter++;
+	altcounter++;
 
 	if (pSwitch)
 		cmd->buttons |= IN_DUCK;
