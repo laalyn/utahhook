@@ -308,9 +308,6 @@ void AntiAim::CreateMove(CUserCmd* cmd)
     if (Settings::Legitbot::AimStep::enabled && Legitbot::aimStepInProgress)
         return;
 
-    if (Settings::AntiAim::RageAntiAim::overrideByHC)
-	return;
-
     QAngle oldAngle = cmd->viewangles;
     float oldForward = cmd->forwardmove;
     float oldSideMove = cmd->sidemove;

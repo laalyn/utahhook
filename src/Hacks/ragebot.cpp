@@ -680,6 +680,12 @@ bool Ragebothitchance(C_BasePlayer* ent, C_BaseCombatWeapon* weapon, CUserCmd* c
 	return false;
 
     Settings::AntiAim::RageAntiAim::overrideByHC = true;
+    if (Settings::AntiAim::RageAntiAim::overrideByHC)
+    {
+	cvar->ConsoleDPrintf(XORSTR("antiaim ovverride status: <===TTTTRRRRUUUUEEEE===>\n"));
+    } else {
+	cvar->ConsoleDPrintf(XORSTR("antiaim ovverride status: false\n"));
+    }
 
     Vector forward, right, up;
     Vector src = ent->GetEyePosition();
