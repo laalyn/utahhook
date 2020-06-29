@@ -5,11 +5,13 @@
 #include "../Utils/entity.h"
 #include "../Utils/math.h"
 #include "../Utils/xorstring.h"
+#include "../Hooks/hooks.h"
 #include "../interfaces.h"
 #include "../settings.h"
 #include "lagcomp.h"
 
 #include <future>
+#include <climits>
 
 #define absolute(x) ( x = x < 0 ? x * -1 : x)
 std::vector<int64_t> Ragebot::friends = {};
@@ -28,6 +30,24 @@ const int MultiVectors = 7, HeadMultiVectors = 11;
 static float prevSpotDamage = NULL;
 
 static Vector DoubleTapSpot = Vector{NULL,NULL,NULL};
+
+#define PI_F (3.14)
+#define absolute(x) ( x = x < 0 ? x * -1 : x)
+
+#define TIME_TO_TICKS(dt) ((int)(0.5f + (float)(dt) / globalVars->interval_per_tick))
+#define TICKS_TO_TIME(t) (TICK_INTERVAL *(t))
+
+#ifndef NormalizeNo
+#define NormalizeNo(x) (x = (x < 0) ? ( x * -1) : x )
+#endif
+
+#ifndef GetPercentVal
+#define GetPercentVal(val, percent) ( val * (percent/100) )
+#endif
+
+#ifndef GetPercent
+#define GetPercent(total, val) ( (val/total) * 100)
+#endif
 
 struct Enemy
 {
@@ -1062,7 +1082,6 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 	
 		if ( player == nullptr )
 		{
-			cvar->ConsoleDPrintf(XORSTR("returning null mean no enemy \n"));
 			return player;
 		}
 
@@ -1217,7 +1236,6 @@ static C_BasePlayer* GetBestEnemyAndSpot(CUserCmd* cmd, Vector* bestSpot, float*
 			WallBangdamage = NULL, 
 			VisibleDamage = NULL;
 
-	cvar->ConsoleDPrintf(XORSTR("in best damage function"));
 	for (int i = 1; i < engine->GetMaxClients(); ++i)
 	{
 		C_BasePlayer* player = (C_BasePlayer*) entityList->GetClientEntity(i);
@@ -1368,7 +1386,9 @@ static bool Ragebothitchance(C_BasePlayer* localplayer, C_BaseCombatWeapon* acti
 
 		hitchance = 1 / (inaccuracy);
 
-		if (Settings::Ragebot::HitChanceOverwrride::enable)
+		cvar->ConsoleDPrintf("current hitchance: %f  -  ", hitchance);
+		cvar->ConsoleDPrintf("target hitchance: %f\n", Settings::Ragebot::HitChance::value);
+	if (Settings::Ragebot::HitChanceOverwrride::enable)
 		{
 	    	return (hitchance >= Settings::Ragebot::HitChance::value * Settings::Ragebot::HitChanceOverwrride::value);
 		}
@@ -1632,6 +1652,286 @@ static void FixMouseDeltas(CUserCmd* cmd, const QAngle& angle, const QAngle& old
     cmd->mousedy = delta.x / (m_pitch * sens * zoomMultiplier);
 }
 
+/* DT ==== */
+
+static bool charged_dt = false;
+static float last_doubletap;
+static float tickBaseShift = 0;
+
+static float GetWeaponFireRate(C_BaseCombatWeapon* weapon) {
+    if (*weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_GLOCK)
+	return 0.15f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_HKP2000 )
+	return 0.169f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_P250 ) //the cz and p250 have the same name idky same with other guns
+	return 0.15f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_TEC9 )
+	return 0.12f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_ELITE )
+	return 0.12f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_FIVESEVEN )
+	return 0.15f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_DEAGLE )
+	return 0.224f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_NOVA )
+	return 0.882f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_SAWEDOFF )
+	return 0.845f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_MAG7 )
+	return 0.845f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_XM1014 )
+	return 0.35f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_MAC10 )
+	return 0.075f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_UMP45 )
+	return 0.089f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_MP9 )
+	return 0.070f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_BIZON )
+	return 0.08f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_MP7 )
+	return 0.08f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_P90 )
+	return 0.070f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_GALILAR )
+	return 0.089f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_AK47 )
+	return 0.1f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_SG556 )
+	return 0.089f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_M4A1 )
+	return 0.089f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_AUG )
+	return 0.089f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_M249 )
+	return 0.08f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_NEGEV )
+	return 0.0008f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_SSG08 )
+	return 1.25f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_AWP )
+	return 1.463f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_G3SG1 )
+	return 0.25f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_SCAR20 )
+	return 0.25f;
+    else if ( *weapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_MP5 )
+	return 0.08f;
+    else
+	return .0f;
+}
+
+static bool CanShift(C_BasePlayer* localPlayer, C_BaseCombatWeapon* activeWeapon)
+{
+
+    if ( !activeWeapon) {
+	cvar->ConsoleDPrintf("\texited CanShift due to not activeweapon\n");
+	return false;
+    }
+
+    float m_flPlayerTime = (localPlayer->GetTickBase() - ((tickBaseShift > 0) ? 1 + tickBaseShift : 0)) * globalVars->interval_per_tick;
+
+    if ( m_flPlayerTime <= activeWeapon->GetNextPrimaryAttack() ) {
+	cvar->ConsoleDPrintf("\tCanShift returned false; playertime: %f, next primaryattck: %f\n", m_flPlayerTime, activeWeapon->GetNextPrimaryAttack());;
+	return false; // no need to shift ticks
+    }
+
+    cvar->ConsoleDPrintf("\t[SUCCESS] CanShift returned true\n");
+    return true;
+}
+
+static bool shoot_again(C_BasePlayer* localplayer, C_BaseCombatWeapon* activeWeapon, CUserCmd* cmd)
+{
+    if ( cmd->tick_count > last_doubletap + TIME_TO_TICKS( GetWeaponFireRate(activeWeapon) * 2 ) )
+    {
+	cvar->ConsoleDPrintf("\t[SUCCESS] shoot_again returned true\n");
+	return true;
+    }
+    else
+    {
+	cvar->ConsoleDPrintf("\tshoot_again returned false; tickcount: %d, target: %f {last_doubletap: %f, TIME_TO_TICKS: %f {weapon firerate x2: %f}}\n", cmd->tick_count, last_doubletap + TIME_TO_TICKS(GetWeaponFireRate(activeWeapon) * 2), last_doubletap, TIME_TO_TICKS(GetWeaponFireRate(activeWeapon) * 2), GetWeaponFireRate(activeWeapon) * 2);
+     	return false;
+    }
+};
+
+static bool should_restore(C_BasePlayer* localPlayer, C_BaseCombatWeapon* activeWeapon, CUserCmd* cmd)
+{
+    static int count = 20;
+    static bool start;
+
+    if ( cmd->tick_count == last_doubletap + TIME_TO_TICKS(GetWeaponFireRate(activeWeapon) * 1) )
+	start = true;
+
+    if ( count == 0 )
+    {
+	start = false;
+	count = 20;
+    }
+    while ( count != 0 && start )
+    {
+	count--;
+	return true;
+    }
+
+    return false;
+}
+
+// auto shoot_2 = [ ] ( ) -> bool
+// {
+//
+//     auto weapon = g_LocalPlayer->m_hActiveWeapon( );
+//     if ( !weapon )
+// 	return false;
+//     float m_flPlayerTime = (g_LocalPlayer->m_nTickBase( ) - ((nTickBaseShift > 0) ? 1 + nTickBaseShift : 0)) * g_pGlobalVars->interval_per_tick;
+//
+//     if ( m_flPlayerTime <= weapon->m_flNextPrimaryAttack( ) )
+// 	return false; // no need to shift ticks
+//
+//     return true;
+// };
+
+static void DtAutoShoot(C_BasePlayer* localplayer, C_BaseCombatWeapon* activeWeapon, CUserCmd* cmd) {
+    if (!Settings::Ragebot::AutoShoot::enabled) {
+	cvar->ConsoleDPrintf("quit autoDT because autoshoot isn't enabled !\n");
+	return;
+    }
+
+    if (!localplayer || activeWeapon->GetAmmo() == 0)
+    {
+	cvar->ConsoleDPrintf("quit autoDT because weapon out of ammo\n");
+	return;
+    }
+
+    if ( !localplayer || !localplayer->GetAlive())
+    {
+	cvar->ConsoleDPrintf("quit autoDT because localplayer dead\n");
+	return;
+    }
+
+    if (!activeWeapon || activeWeapon->GetInReload())
+    {
+	cvar->ConsoleDPrintf("quit autoDT because reloading weapon\n");
+	return;
+    }
+
+    // if ( !activeWeapon || activeWeapon->m_iClip1( ) == 0 ) return;
+
+    // holding knife
+    if (*activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_KNIFE) {
+	cvar->ConsoleDPrintf("quit autoDT because holding knife\n");
+	return;
+    }
+    // holding taser
+    if (*activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_TASER ) {
+	cvar->ConsoleDPrintf("quit autoDT because holding taser\n");
+	return;
+    }
+    // holding nade
+    if (*activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_HEGRENADE || *activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_INCGRENADE || *activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_FLASHBANG || *activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_SMOKEGRENADE || *activeWeapon->GetItemDefinitionIndex() == ItemDefinitionIndex::WEAPON_MOLOTOV || *activeWeapon->GetItemDefinitionIndex( ) == ItemDefinitionIndex::WEAPON_DECOY || Util::Items::IsKnife(*activeWeapon->GetItemDefinitionIndex())) {
+	cvar->ConsoleDPrintf("quit autoDT because holding nade\n");
+	return;
+    }
+
+    if (cmd->buttons & IN_USE)
+	return;
+
+    if (Settings::Ragebot::HitChance::enabled && !Ragebothitchance(localplayer, activeWeapon))
+    {
+	cvar->ConsoleDPrintf("quit autoDT because hitchance not met\n");
+	return;
+    }
+
+    if (Settings::Ragebot::AutoShoot::autoscope && Util::Items::IsScopeable(*activeWeapon->GetItemDefinitionIndex()) && !localplayer->IsScoped() && !(cmd->buttons & IN_ATTACK2))
+    {
+	cvar->ConsoleDPrintf("autoDT attempting scope in\n");
+	cmd->buttons |= IN_ATTACK2;
+    }
+
+    float flServerTime = localplayer->GetTickBase() * globalVars->interval_per_tick;
+    bool canShoot = (activeWeapon->GetNextPrimaryAttack() <= flServerTime);
+
+    // static bool charge_dt = false;
+
+    // ALWAYS DTTTT
+    // TODO: add dt settings
+    // if ( GetKeyState( Variables.rageaimbot.fastshoot ) )
+    // charge_dt = true;
+
+    // if ( false )// Variables.rageaimbot.doubletab == 1 )
+    // {
+// 	if ( charge_dt && shoot_again(localplayer, activeWeapon, cmd) )
+// 	    charged_dt = true;
+// 	else
+// 	    charged_dt = false;
+    // }
+    // else
+    // {
+    // charged_dt = shoot_again(localplayer, activeWeapon, cmd);
+    //     }
+
+    if ( should_restore( localplayer, activeWeapon, cmd ) )
+    {
+	// doubletap_delta = 0; NOT USED ??
+	cvar->ConsoleDPrintf("autoDT attempting restore\n");
+	last_doubletap = 0;
+	cmd->tick_count = INT_MAX;
+	cmd->buttons &= ~IN_ATTACK;
+    }
+
+//     if (charge_dt && !CanShift())
+//     {
+// 	    if (cmd->buttons & IN_ATTACK)
+// 		    cmd->viewangles = angle - localplayer->m_aimPunchAngle() * g_CVar->FindVar("weapon_recoil_scale")->GetFloat();
+//     }
+
+
+//     if ( false )// Variables.rageaimbot.doubletab == 1 )
+//     {
+// 	if ( charge_dt && CanShift(localplayer, activeWeapon) && shoot_again( localplayer, activeWeapon, cmd ) )
+// 	{
+// 	    // LMAOTODO: do smt with chokePack
+// 	    // globals::chockepack = 1;
+// 	    CreateMove::sendPacket = false;
+// 	    if ( cmd->buttons & IN_ATTACK )
+// 	    {
+// 		last_doubletap = cmd->tick_count;
+// 		tickBaseShift = TIME_TO_TICKS(GetWeaponFireRate(activeWeapon));
+// 	    }
+// 	    charge_dt = false;
+// 	}
+//
+//     }
+//     else // else if ( Variables.rageaimbot.doubletab == 2 )
+//     {
+	if (CanShift( localplayer, activeWeapon ) && shoot_again( localplayer, activeWeapon, cmd ))
+	{
+	    // globals::chockepack = 1;
+	    cvar->ConsoleDPrintf("<< autoDT attempting packet choke >>\n");
+	    CreateMove::sendPacket = false;
+
+	    if (cmd->buttons & IN_ATTACK)
+	    {
+		cvar->ConsoleDPrintf("<<<< autoDT attempting shoot >>>>\n");
+		cmd->buttons |= IN_ATTACK;
+		last_doubletap = cmd->tick_count;
+		tickBaseShift = TIME_TO_TICKS(GetWeaponFireRate(activeWeapon));
+	    }
+	} else if (shoot_again(localplayer, activeWeapon, cmd)) // TODO: does this work? idk if this works
+	{
+	    if (true || cmd->buttons & IN_ATTACK)
+	    {
+		cvar->ConsoleDPrintf("< autoDT attempting non-dt shoot >\n");
+		cmd->buttons |= IN_ATTACK;
+		// last_doubletap = cmd->tick_count;
+		// tickBaseShift = TIME_TO_TICKS(GetWeaponFireRate(activeWeapon));
+	    }
+	}
+//     }
+
+    cvar->ConsoleDPrintf("[autoDT] call finished.\n");
+
+}
+
 void Ragebot::CreateMove(CUserCmd* cmd)
 {
 
@@ -1734,7 +2034,8 @@ void Ragebot::CreateMove(CUserCmd* cmd)
 
     RagebotAutoSlow(player, oldForward, oldSideMove, bestDamage, activeWeapon, cmd);
     RagebotAutoPistol(activeWeapon, cmd);
-    RagebotAutoShoot(player, activeWeapon, cmd);
+    // RagebotAutoShoot(player, activeWeapon, cmd);
+    DtAutoShoot(player, activeWeapon, cmd);
     AutoCock(player, activeWeapon, cmd);
     RagebotRCS(angle, player, cmd, localplayer, activeWeapon);
 
