@@ -117,75 +117,75 @@ static void DrawPlayer(void* thisptr, void* context, void *state, const ModelRen
 	// No need to call DME again, it already gets called in DrawModelExecute.cpp
 }
 
-static void DrawFake(void* thisptr, void* context, void *state, const ModelRenderInfo_t &pInfo, matrix3x4_t* pCustomBoneToWorld)
-{
-
-    if (!Settings::AntiAim::Yaw::enabled)
-	return;
-
-    C_BasePlayer* localplayer = (C_BasePlayer*)entityList->GetClientEntity(engine->GetLocalPlayer());
-    if (!localplayer)
-	return;
-
-    C_BasePlayer* entity = (C_BasePlayer*)entityList->GetClientEntity(pInfo.entity_index);
-
-    if (!entity
-	|| entity->GetDormant()
-	|| !entity->GetAlive())
-	return;
-
-    IMaterial* Fake_meterial = nullptr;
-
-    Fake_meterial = materialChams;
-    Fake_meterial->AlphaModulate(1.f);
-
-    if (entity == localplayer)
-    {
-	/*
-		* Testing for chams in fake angle 
-		* Hope for best
-		*/
-
-	// TODO: set field for this in colorpicker
-	// Color fake_color = Color::FromImColor(Settings::ESP::Chams::FakeColor.Color(entity));
-	Color fake_color = Color::FromImColor(Settings::ESP::Chams::allyVisibleColor.Color(entity));
-	Color color = fake_color;
-	color *= 0.45f;
-
-	Fake_meterial->ColorModulate(fake_color);
-	Fake_meterial->AlphaModulate(Settings::ESP::Chams::FakeColor.Color(entity).Value.w);
-
-	static matrix3x4_t fakeBoneMatrix[128];
-	float fakeangle = AntiAim::fakeAngle.y - AntiAim::realAngle.y;
-	static Vector OutPos;
-	for (int i = 0; i < 128; i++)
-	{
-	    Math::AngleMatrix(Vector(0, fakeangle, 0), fakeBoneMatrix[i]);
-	    matrix::MatrixMultiply(fakeBoneMatrix[i], pCustomBoneToWorld[i]);
-	    Vector BonePos = Vector(pCustomBoneToWorld[i][0][3], pCustomBoneToWorld[i][1][3], pCustomBoneToWorld[i][2][3]) - pInfo.origin;
-	    Math::VectorRotate(BonePos, Vector(0, fakeangle, 0), OutPos);
-	    OutPos += pInfo.origin;
-	    fakeBoneMatrix[i][0][3] = OutPos.x;
-	    fakeBoneMatrix[i][1][3] = OutPos.y;
-	    fakeBoneMatrix[i][2][3] = OutPos.z;
-	}
-
-	if (entity->GetImmune())
-	{
-	    Fake_meterial->AlphaModulate(0.5f);
-	}
-	//entity->SetupBones
-	modelRender->ForcedMaterialOverride(Fake_meterial);
-	modelRenderVMT->GetOriginalMethod<DrawModelExecuteFn>(21)(thisptr, context, state, pInfo, fakeBoneMatrix);
-	//modelRenderVMT->ApplyVMT();
-
-	// End of chams for fake angle
-    }
-    else
-    {
-	return;
-    }
-}
+// static void DrawFake(void* thisptr, void* context, void *state, const ModelRenderInfo_t &pInfo, matrix3x4_t* pCustomBoneToWorld)
+// {
+//
+//     if (!Settings::AntiAim::Yaw::enabled)
+// 	return;
+//
+//     C_BasePlayer* localplayer = (C_BasePlayer*)entityList->GetClientEntity(engine->GetLocalPlayer());
+//     if (!localplayer)
+// 	return;
+//
+//     C_BasePlayer* entity = (C_BasePlayer*)entityList->GetClientEntity(pInfo.entity_index);
+//
+//     if (!entity
+// 	|| entity->GetDormant()
+// 	|| !entity->GetAlive())
+// 	return;
+//
+//     IMaterial* Fake_meterial = nullptr;
+//
+//     Fake_meterial = materialChams;
+//     Fake_meterial->AlphaModulate(1.f);
+//
+//     if (entity == localplayer)
+//     {
+// 	/*
+// 		* Testing for chams in fake angle
+// 		* Hope for best
+// 		*/
+//
+// 	// TODO: set field for this in colorpicker
+// 	// Color fake_color = Color::FromImColor(Settings::ESP::Chams::FakeColor.Color(entity));
+// 	Color fake_color = Color::FromImColor(Settings::ESP::Chams::allyVisibleColor.Color(entity));
+// 	Color color = fake_color;
+// 	color *= 0.45f;
+//
+// 	Fake_meterial->ColorModulate(fake_color);
+// 	Fake_meterial->AlphaModulate(Settings::ESP::Chams::FakeColor.Color(entity).Value.w);
+//
+// 	static matrix3x4_t fakeBoneMatrix[128];
+// 	float fakeangle = AntiAim::fakeAngle.y - AntiAim::realAngle.y;
+// 	static Vector OutPos;
+// 	for (int i = 0; i < 128; i++)
+// 	{
+// 	    Math::AngleMatrix(Vector(0, fakeangle, 0), fakeBoneMatrix[i]);
+// 	    matrix::MatrixMultiply(fakeBoneMatrix[i], pCustomBoneToWorld[i]);
+// 	    Vector BonePos = Vector(pCustomBoneToWorld[i][0][3], pCustomBoneToWorld[i][1][3], pCustomBoneToWorld[i][2][3]) - pInfo.origin;
+// 	    Math::VectorRotate(BonePos, Vector(0, fakeangle, 0), OutPos);
+// 	    OutPos += pInfo.origin;
+// 	    fakeBoneMatrix[i][0][3] = OutPos.x;
+// 	    fakeBoneMatrix[i][1][3] = OutPos.y;
+// 	    fakeBoneMatrix[i][2][3] = OutPos.z;
+// 	}
+//
+// 	if (entity->GetImmune())
+// 	{
+// 	    Fake_meterial->AlphaModulate(0.5f);
+// 	}
+// 	//entity->SetupBones
+// 	modelRender->ForcedMaterialOverride(Fake_meterial);
+// 	modelRenderVMT->GetOriginalMethod<DrawModelExecuteFn>(21)(thisptr, context, state, pInfo, fakeBoneMatrix);
+// 	//modelRenderVMT->ApplyVMT();
+//
+// 	// End of chams for fake angle
+//     }
+//     else
+//     {
+// 	return;
+//     }
+// }
 
 static void DrawRecord(void *thisptr, void *context, void *state, const ModelRenderInfo_t &pInfo, matrix3x4_t *pCustomBoneToWorld)
 {
@@ -291,7 +291,7 @@ void Chams::DrawModelExecute(void* thisptr, void* context, void *state, const Mo
 
 	if (modelName.find(XORSTR("models/player")) != std::string::npos)
 	{
-		DrawFake(thisptr, context, state, pInfo, pCustomBoneToWorld);
+		// DrawFake(thisptr, context, state, pInfo, pCustomBoneToWorld);
 		DrawPlayer(thisptr, context, state, pInfo, pCustomBoneToWorld);
 		DrawRecord(thisptr, context, state, pInfo, pCustomBoneToWorld);
 

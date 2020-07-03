@@ -250,28 +250,21 @@ void Settings::LoadDefaultsOrSave(std::string path)
     //settings[XORSTR("Legitbot")][XORSTR("AutoShoot")][XORSTR("velocityCheck")] = Settings::Legitbot::AutoShoot::velocityCheck;
     settings[XORSTR("Ragebot")][XORSTR("AutoShoot")][XORSTR("velocityCheck")] = Settings::Ragebot::AutoShoot::velocityCheck;
 
-    settings[XORSTR("AntiAim")][XORSTR("AutoDisable")][XORSTR("no_enemy")] = Settings::AntiAim::AutoDisable::noEnemy;
-    settings[XORSTR("AntiAim")][XORSTR("AutoDisable")][XORSTR("knife_held")] = Settings::AntiAim::AutoDisable::knifeHeld;
-    settings[XORSTR("AntiAim")][XORSTR("Rage AntiAim")][XORSTR("enabled")] = Settings::AntiAim::RageAntiAim::enable;
-    settings[XORSTR("AntiAim")][XORSTR("ManualAntiAim")][XORSTR("Enable")] = Settings::AntiAim::ManualAntiAim::Enable;
-    
-    /*
-    * legit anti aim settings 
-    */
-    settings[XORSTR("AntiAim")][XORSTR("Legit AntiAim")][XORSTR("enabled")] = Settings::AntiAim::LegitAntiAim::enable;
-    settings[XORSTR("AntiAim")][XORSTR("Legit AntiAim")][XORSTR("togglekey")] = Util::GetButtonName(Settings::AntiAim::LegitAntiAim::InvertKey);
-    settings[XORSTR("AntiAim")][XORSTR("Legit AntiAim")][XORSTR("inverted")] = Settings::AntiAim::LegitAntiAim::enable;
-    // END
 
-    settings[XORSTR("AntiAim")][XORSTR("Yaw")][XORSTR("enabled")] = Settings::AntiAim::Yaw::enabled;
-	settings[XORSTR("AntiAim")][XORSTR("Yaw")][XORSTR("type")] = (int) Settings::AntiAim::Yaw::typeReal;
-	settings[XORSTR("AntiAim")][XORSTR("Yaw")][XORSTR("type_fake")] = (int) Settings::AntiAim::Yaw::typeFake;
-    settings[XORSTR("AntiAim")][XORSTR("Pitch")][XORSTR("enabled")] = Settings::AntiAim::Pitch::enabled;
-    settings[XORSTR("AntiAim")][XORSTR("Pitch")][XORSTR("type")] = (int)Settings::AntiAim::Pitch::type;
-    settings[XORSTR("AntiAim")][XORSTR("HeadEdge")][XORSTR("enabled")] = Settings::AntiAim::HeadEdge::enabled;
-    settings[XORSTR("AntiAim")][XORSTR("HeadEdge")][XORSTR("distance")] = Settings::AntiAim::HeadEdge::distance;
+    settings[XORSTR("AntiAim")][XORSTR("enabled")] = Settings::AntiAim::enabled;
+    settings[XORSTR("AntiAim")][XORSTR("type")] = (int)Settings::AntiAim::type;
+    settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("enabled")] = Settings::AntiAim::States::enabled;
+    settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("Stand")][XORSTR("type")] = (int)Settings::AntiAim::States::Stand::type;
+    settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("Stand")][XORSTR("angle")] = Settings::AntiAim::States::Stand::angle;
+    settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("Run")][XORSTR("type")] = (int)Settings::AntiAim::States::Run::type;
+    settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("Run")][XORSTR("angle")] = Settings::AntiAim::States::Run::angle;
+    settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("Air")][XORSTR("type")] = (int)Settings::AntiAim::States::Air::type;
+    settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("Air")][XORSTR("angle")] = Settings::AntiAim::States::Air::angle;
+    settings[XORSTR("AntiAim")][XORSTR("left")] = Util::GetButtonName(Settings::AntiAim::left);
+    settings[XORSTR("AntiAim")][XORSTR("right")] = Util::GetButtonName(Settings::AntiAim::right);
     settings[XORSTR("AntiAim")][XORSTR("LBYBreaker")][XORSTR("enabled")] = Settings::AntiAim::LBYBreaker::enabled;
     settings[XORSTR("AntiAim")][XORSTR("LBYBreaker")][XORSTR("offset")] = Settings::AntiAim::LBYBreaker::offset;
+    settings[XORSTR("AntiAim")][XORSTR("AutoDisable")][XORSTR("knifeHeld")] = Settings::AntiAim::AutoDisable::knifeHeld;
 
     settings[XORSTR("Resolver")][XORSTR("resolve_all")] = Settings::Resolver::resolveAll;
     settings[XORSTR("ResolverNimbus")][XORSTR("resolve_all")] = Settings::Resolver::resolverNumbus;
@@ -820,28 +813,21 @@ void Settings::LoadConfig(std::string path)
     GetVal(settings[XORSTR("Legitbot")][XORSTR("AutoCrouch")][XORSTR("enabled")], &Settings::Legitbot::AutoCrouch::enabled);
     GetVal(settings[XORSTR("Legitbot")][XORSTR("enabled")], &Settings::Legitbot::enabled);
     GetVal(settings[XORSTR("Ragebot")][XORSTR("enabled")], &Settings::Ragebot::enabled);
-    GetVal(settings[XORSTR("AntiAim")][XORSTR("AutoDisable")][XORSTR("no_enemy")], &Settings::AntiAim::AutoDisable::noEnemy);
-    GetVal(settings[XORSTR("AntiAim")][XORSTR("AutoDisable")][XORSTR("knife_held")], &Settings::AntiAim::AutoDisable::knifeHeld);
-    GetVal(settings[XORSTR("AntiAim")][XORSTR("Rage AntiAim")][XORSTR("enabled")], &Settings::AntiAim::RageAntiAim::enable);
-    GetVal(settings[XORSTR("AntiAim")][XORSTR("ManualAntiAim")][XORSTR("Enable")], &Settings::AntiAim::ManualAntiAim::Enable);
-    
-    /* 
-    *Legit Anti AIm Settings Saving
-    */
-    GetVal(settings[XORSTR("AntiAim")][XORSTR("Legit AntiAim")][XORSTR("enabled")], &Settings::AntiAim::LegitAntiAim::enable);
-    GetButtonCode(settings[XORSTR("AntiAim")][XORSTR("Legit AntiAim")][XORSTR("togglekey")], &Settings::AntiAim::LegitAntiAim::InvertKey);
-    GetVal(settings[XORSTR("AntiAim")][XORSTR("Legit AntiAim")][XORSTR("inverted")], &Settings::AntiAim::LegitAntiAim::inverted);
-    
-    
-    GetVal(settings[XORSTR("AntiAim")][XORSTR("Yaw")][XORSTR("enabled")], &Settings::AntiAim::Yaw::enabled);
-	GetVal(settings[XORSTR("AntiAim")][XORSTR("Yaw")][XORSTR("type")], (int*)&Settings::AntiAim::Yaw::typeReal);
-	GetVal(settings[XORSTR("AntiAim")][XORSTR("Yaw")][XORSTR("type_fake")], (int*)&Settings::AntiAim::Yaw::typeFake);
-    GetVal(settings[XORSTR("AntiAim")][XORSTR("Pitch")][XORSTR("enabled")], &Settings::AntiAim::Pitch::enabled);
-    GetVal(settings[XORSTR("AntiAim")][XORSTR("Pitch")][XORSTR("type")], (int*)&Settings::AntiAim::Pitch::type);
-    GetVal(settings[XORSTR("AntiAim")][XORSTR("HeadEdge")][XORSTR("enabled")], &Settings::AntiAim::HeadEdge::enabled);
-    GetVal(settings[XORSTR("AntiAim")][XORSTR("HeadEdge")][XORSTR("distance")], &Settings::AntiAim::HeadEdge::distance);
+
+    GetVal(settings[XORSTR("AntiAim")][XORSTR("enabled")], &Settings::AntiAim::enabled);
+    GetVal(settings[XORSTR("AntiAim")][XORSTR("type")], (int *)&Settings::AntiAim::type);
+    GetVal(settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("enabled")], &Settings::AntiAim::States::enabled);
+    GetVal(settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("Stand")][XORSTR("type")], (int *)&Settings::AntiAim::States::Stand::type);
+    GetVal(settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("Stand")][XORSTR("angle")], &Settings::AntiAim::States::Stand::angle);
+    GetVal(settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("Run")][XORSTR("type")], (int *)&Settings::AntiAim::States::Run::type);
+    GetVal(settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("Run")][XORSTR("angle")], &Settings::AntiAim::States::Run::angle);
+    GetVal(settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("Air")][XORSTR("type")], (int *)&Settings::AntiAim::States::Air::type);
+    GetVal(settings[XORSTR("AntiAim")][XORSTR("States")][XORSTR("Air")][XORSTR("angle")], &Settings::AntiAim::States::Air::angle);
+    GetButtonCode(settings[XORSTR("Antiaim")][XORSTR("left")], &Settings::AntiAim::left);
+    GetButtonCode(settings[XORSTR("Antiaim")][XORSTR("right")], &Settings::AntiAim::right);
     GetVal(settings[XORSTR("AntiAim")][XORSTR("LBYBreaker")][XORSTR("enabled")], &Settings::AntiAim::LBYBreaker::enabled);
     GetVal(settings[XORSTR("AntiAim")][XORSTR("LBYBreaker")][XORSTR("offset")], &Settings::AntiAim::LBYBreaker::offset);
+    GetVal(settings[XORSTR("AntiAim")][XORSTR("AutoDisable")][XORSTR("knifeHeld")], &Settings::AntiAim::AutoDisable::knifeHeld);
 
     GetVal(settings[XORSTR("Resolver")][XORSTR("resolve_all")], &Settings::Resolver::resolveAll);
     GetVal(settings[XORSTR("ResolverNimbus")][XORSTR("resolve_all")], &Settings::Resolver::resolverNumbus);

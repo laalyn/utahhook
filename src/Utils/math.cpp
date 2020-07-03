@@ -22,18 +22,6 @@ float Math::float_rand( float min, float max ) // thanks foo - https://stackover
 	return min + scale * ( max - min );      /* [min, max] */
 }
 
-void Math::AngleVectors(const QAngle &angles, Vector& forward)
-{
-	float sp, sy, cp, cy;
-
-	Math::SinCos(DEG2RAD(angles[YAW]), &sy, &cy);
-	Math::SinCos(DEG2RAD(angles[PITCH]), &sp, &cp);
-
-	forward.x = cp * cy;
-	forward.y = cp * sy;
-	forward.z = -sp;
-}
-
 void Math::VectorRotate(const float *in1, const matrix3x4_t& in2, float *out)
 {
     out[0] = Math::DotProduct(in1, in2[0]);
@@ -52,6 +40,40 @@ void Math::VectorRotate(const Vector& in1, const matrix3x4_t &in2, Vector &out)
 {
     Math::VectorRotate(&in1.x, in2, &out.x);
 }
+
+void Math::AngleVectors(const QAngle &angles, Vector& forward)
+{
+    float sp, sy, cp, cy;
+
+    Math::SinCos(DEG2RAD(angles[YAW]), &sy, &cy);
+    Math::SinCos(DEG2RAD(angles[PITCH]), &sp, &cp);
+
+    forward.x = cp * cy;
+    forward.y = cp * sy;
+    forward.z = -sp;
+}
+
+void Math::AngleVectors(const QAngle &angles, Vector &forward, Vector &right, Vector &up)
+{
+    float sr, sp, sy, cr, cp, cy;
+
+    SinCos(DEG2RAD(angles[1]), &sy, &cy);
+    SinCos(DEG2RAD(angles[0]), &sp, &cp);
+    SinCos(DEG2RAD(angles[2]), &sr, &cr);
+
+    forward.x = (cp * cy);
+    forward.y = (cp * sy);
+    forward.z = (-sp);
+
+    right.x = (-1 * sr * sp * cy + -1 * cr * -sy);
+    right.y = (-1 * sr * sp * sy + -1 * cr * cy);
+    right.z = (-1 * sr * cp);
+
+    up.x = (cr * sp * cy + -sr * -sy);
+    up.y = (cr * sp * sy + -sr * cy);
+    up.z = (cr * cp);
+}
+
 void Math::AngleVectors( const Vector& angles, Vector* forward, Vector* right, Vector* up ) {
 	float sr, sp, sy, cr, cp, cy;
 

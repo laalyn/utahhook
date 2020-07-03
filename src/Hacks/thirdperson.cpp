@@ -40,7 +40,7 @@ void ThirdPerson::OverrideView(CViewSetup *pSetup)
 		}
 		else if ( !inputSystem->IsButtonDown(Settings::ThirdPerson::toggleThirdPerson ) && buttonToggle == true)
 			buttonToggle = false;
-		
+
 		// END
 
 		if (Settings::ThirdPerson::toggled)
@@ -68,7 +68,7 @@ void ThirdPerson::OverrideView(CViewSetup *pSetup)
 			input->m_fCameraInThirdPerson = false;
 			input->m_vecCameraOffset = Vector(0.f, 0.f, 0.f);
 		}
-		
+
 	}
 	else if(input->m_fCameraInThirdPerson)
 	{
@@ -76,20 +76,16 @@ void ThirdPerson::OverrideView(CViewSetup *pSetup)
 		input->m_vecCameraOffset = Vector(0.f, 0.f, 0.f);
 	}
 
-	
-}
 
+}
 
 void ThirdPerson::FrameStageNotify(ClientFrameStage_t stage)
 {
-	if (stage == ClientFrameStage_t::FRAME_RENDER_START && engine->IsInGame())
-	{
-		C_BasePlayer* localplayer = (C_BasePlayer*) entityList->GetClientEntity(engine->GetLocalPlayer());
+    if (stage == ClientFrameStage_t::FRAME_RENDER_START && engine->IsInGame())
+    {
+	C_BasePlayer *localplayer = (C_BasePlayer *)entityList->GetClientEntity(engine->GetLocalPlayer());
 
-		if (localplayer && localplayer->GetAlive() && Settings::ThirdPerson::enabled && input->m_fCameraInThirdPerson)
-		{
-			if (Settings::AntiAim::Yaw::enabled)
-				*localplayer->GetVAngles() = AntiAim::realAngle;
-		}
-	}
+	if (localplayer && localplayer->GetAlive() && Settings::ThirdPerson::enabled && input->m_fCameraInThirdPerson)
+	    *localplayer->GetVAngles() = CreateMove::lastTickViewAngles;
+    }
 }

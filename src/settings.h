@@ -162,6 +162,14 @@ enum class ShowedAngle : int
     FAKE,
 };
 
+enum class AntiAimType : int
+{
+    RAGE,
+    LEGIT,
+    CUSTOM,
+    FREESTAND,
+};
+
 enum class AntiAimType_Y : int
 {
 	NONE,
@@ -716,58 +724,51 @@ namespace Settings
 			inline int lastRoll = 0;
 		}
 	}
+	namespace AntiAim
+	{
+	    inline bool enabled = false;
+	    inline AntiAimType type = AntiAimType::RAGE;
 
-    namespace AntiAim
-    {
-        namespace AutoDisable
-        {
-            inline bool noEnemy = false;
-            inline bool knifeHeld = false;
-        }
+	    inline float yaw = 180.0f;
 
-        namespace RageAntiAim
-        {
-            inline bool enable = false;
-        }
+	    inline ButtonCode_t left = ButtonCode_t::KEY_X;
+	    inline ButtonCode_t right = ButtonCode_t::KEY_C;
 
-		namespace LegitAntiAim 
-		{
-			inline bool enable = false;
-			inline ButtonCode_t InvertKey = ButtonCode_t::KEY_T;
-			inline bool inverted = false;
-		}
-		
-		namespace ManualAntiAim
-		{
-			inline bool Enable = false;
-			inline ButtonCode_t backButton = ButtonCode_t::KEY_X;
-			inline ButtonCode_t RightButton = ButtonCode_t::KEY_C;
-			inline ButtonCode_t LeftButton = ButtonCode_t::KEY_Z;
-		}
-        namespace Yaw
-        {
-            inline bool enabled = false;
-            inline AntiAimType_Y typeReal = AntiAimType_Y::NONE;
-            inline AntiAimType_Y typeFake = AntiAimType_Y::MAX_DELTA_LBY_AVOID;
-        }
+	    namespace AutoDisable
+	    {
+		inline bool knifeHeld = false;
+	    }
 
-        namespace Pitch
-        {
-            inline bool enabled = false;
-            inline AntiAimType_X type = AntiAimType_X::STATIC_DOWN;
-        }
+	    namespace States
+	    {
+		inline bool enabled = false;
 
-        namespace HeadEdge
-        {
-            inline bool enabled = false;
-            inline float distance = 25.0f;
-        }
-        namespace LBYBreaker
-        {
-            inline bool enabled = false;
-            inline float offset = 180.0f;
-        }
-    }
+	    namespace Stand
+	    {
+		inline AntiAimType type = AntiAimType::RAGE;
+		inline float angle = 180.0f;
+	    }
+
+	    namespace Run
+	    {
+		inline AntiAimType type = AntiAimType::RAGE;
+		inline float angle = 180.0f;
+	    }
+
+	    namespace Air
+	    {
+		inline AntiAimType type = AntiAimType::RAGE;
+		inline float angle = 180.0f;
+	    }
+	    }
+
+	    namespace LBYBreaker
+	    {
+		inline bool enabled = false;
+		inline float offset = 180.0f;
+	    }
+	}
+
 
 	namespace FakeDuck
 	{
