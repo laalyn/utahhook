@@ -8,6 +8,7 @@
 #include "../interfaces.h"
 #include "../settings.h"
 #include "lagcomp.h"
+#include "../Hooks/hooks.h"
 
 #include <future>
 
@@ -1062,7 +1063,6 @@ static C_BasePlayer* GetClosestPlayerAndSpot(CUserCmd* cmd, Vector* bestSpot, fl
 	
 		if ( player == nullptr )
 		{
-			cvar->ConsoleDPrintf(XORSTR("returning null mean no enemy \n"));
 			return player;
 		}
 
@@ -1217,7 +1217,6 @@ static C_BasePlayer* GetBestEnemyAndSpot(CUserCmd* cmd, Vector* bestSpot, float*
 			WallBangdamage = NULL, 
 			VisibleDamage = NULL;
 
-	cvar->ConsoleDPrintf(XORSTR("in best damage function"));
 	for (int i = 1; i < engine->GetMaxClients(); ++i)
 	{
 		C_BasePlayer* player = (C_BasePlayer*) entityList->GetClientEntity(i);
@@ -1300,10 +1299,10 @@ static C_BasePlayer* GetBestEnemyAndSpot(CUserCmd* cmd, Vector* bestSpot, float*
 		    	*bestSpot = wallBangSpot;
 		    	closestEntity = player;
 		    	lastRayEnd = wallBangSpot;
-				return closestEntity;	
-			}		
+				return closestEntity;
+			}
 		}
-		
+
 		else if ( Settings::Ragebot::damagePrediction == DamagePrediction::damage) // if the damage prediction is best damage
 		{
 			if ( VisibleDamage > 0.f &&  VisibleDamage >= WallBangdamage)
@@ -1343,10 +1342,10 @@ static C_BasePlayer* GetBestEnemyAndSpot(CUserCmd* cmd, Vector* bestSpot, float*
 		    		closestEntity = player;
 		    		lastRayEnd = wallBangSpot;
 				}
-			
+
 			}
 		}
-	
+
 	}
 
 	return closestEntity;
@@ -1502,7 +1501,7 @@ static void RagebotAutoSlow(C_BasePlayer* player, float& forward, float& sideMov
 				return;
 			}*/
 
-	/*else if (cmd->buttons & IN_ATTACK) 
+	/*else if (cmd->buttons & IN_ATTACK)
         {
             cmd->buttons |= IN_WALK;
 			return;
@@ -1604,11 +1603,16 @@ static void RagebotAutoShoot(C_BasePlayer* player, C_BaseCombatWeapon* activeWea
     {
 	if (nextPrimaryAttack > globalVars->curtime)
 	{
+	    // cvar->ConsoleDPrintf("<<<<< [RageBot] Done hiding shot\n >>>>>");
+	    // cvar->ConsoleDPrintf("[RageBot] finished fire {tick: %d}\n", CreateMove::tickCnt);
 	    cmd->buttons &= ~IN_ATTACK;
 	    return;
 	}
 	else
 	{
+	    // cvar->ConsoleDPrintf("[RageBot] Hiding shot {mastersend: %d}\n", CreateMove::masterSend);
+	    // cvar->ConsoleDPrintf("[RageBot] fired {tick: %d}\n", CreateMove::tickCnt);
+	    CreateMove::hideShot = true;
 	    cmd->buttons |= IN_ATTACK;
 	    return;
 	}

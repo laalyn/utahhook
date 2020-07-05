@@ -39,15 +39,40 @@ typedef bool (*CreateMoveFn) (void*, float, CUserCmd*);
 
 bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
 {
-	clientModeVMT->GetOriginalMethod<CreateMoveFn>(25)(thisptr, flInputSampleTime, cmd);
+    clientModeVMT->GetOriginalMethod<CreateMoveFn>(25)(thisptr, flInputSampleTime, cmd);
 
-	if (cmd && cmd->command_number)
-	{
-        // Special thanks to Gre-- I mean Heep ( https://www.unknowncheats.me/forum/counterstrike-global-offensive/290258-updating-bsendpacket-linux.html )
+    if (cmd && cmd->command_number)
+    {
+	// Special thanks to Gre-- I mean Heep ( https://www.unknowncheats.me/forum/counterstrike-global-offensive/290258-updating-bsendpacket-linux.html )
         uintptr_t rbp;
         asm volatile("mov %%rbp, %0" : "=r" (rbp));
         bool *sendPacket = ((*(bool **)rbp) - 0x18);
-        CreateMove::sendPacket = true;
+	C_BasePlayer* localplayer = (C_BasePlayer*)entityList->GetClientEntity(engine->GetLocalPlayer());
+	static bool shutUp = false;
+	if (!localplayer || !localplayer->GetAlive()) {
+	    *sendPacket = true;
+	    CreateMove::hideShot = false;
+	    if (!shutUp) cvar->ConsoleDPrintf("[CreateMove] sendPacket enabled, you are dead\n");
+	    shutUp = true;
+	} else
+	{
+	    shutUp = false;
+	    *sendPacket = false;
+	}
+
+	static int ticksElapsed;
+	if (CreateMove::hideShot)
+	{
+	    ticksElapsed++;
+	    cvar->ConsoleDPrintf("[RageBot -> CreateMove] ticks passed since hideShot: %d\n", ticksElapsed);
+	    if (ticksElapsed == 1) // cant push it more than this much
+	    {
+		CreateMove::hideShot = false;
+		cvar->ConsoleDPrintf("[RageBot -> CreateMove] finished hiding shot {tick: %d}\n", CreateMove::tickCnt);
+	    }
+	}
+
+	CreateMove::sendPacket = true;
 
 	/* run code that affects movement before prediction */
 	BHop::CreateMove(cmd);
@@ -80,12 +105,28 @@ bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
     	EdgeJump::PostPredictionCreateMove(cmd);
     	NoFall::PostPredictionCreateMove(cmd);
 
-        *sendPacket = CreateMove::sendPacket;
+	if (CreateMove::hideShot)
+	{
+	    *sendPacket = false;
+	    ticksElapsed = 0;
+	    cvar->ConsoleDPrintf("[RageBot -> CreateMove] hiding shot {tick: %d}\n", CreateMove::tickCnt);
+	}
+	else
+	{
+	    *sendPacket = CreateMove::sendPacket;
+	}
 
-        if (CreateMove::sendPacket) {
+	if (CreateMove::sendPacket) {
             CreateMove::lastTickViewAngles = cmd->viewangles;
         }
+
+	CreateMove::tickCnt++;
+	if (CreateMove::tickCnt > 1024) {
+	    CreateMove::tickCnt = 0;
 	}
+
+
+    }
 
 	return false;
 }

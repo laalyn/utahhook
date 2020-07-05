@@ -1,0 +1,26 @@
+---- FIXME RIGHT NOW ----
+Severe:
+    CreateMove: make sure not left on chocke when dead
+Important:
+    CreateMove, other: manage chocke usage and have a priority system, mb dt will work after this
+    RageBot: Why is viewport jumping around sometimes, quality check closest to crosshair
+    CreateMove: Add a mode for casual where all *packetChocke usage is disabled to avoid vac error
+Semi-Important:
+    AntiAim: make an actual at the target, plus align left/right ovverrides; maybe 'fake' jitter too
+    README: make a features list, with markers for reliability e.g. p100, stable, unstable, problematic, unknown, outdated, new
+Other:
+    Resolver: paste a new one in
+    RageBot: make dt work
+    Misc: paste slowwalk
+
+
+---- TIPS FOR CODING ----
+*sendPacket can only be used at CreateMove hook, because its on the stack
+*sendPacket can only be changed once per twice, a tick is one CreateMove call after the if (cmd->...) statement
+when *sendPacket is false, user actions will be stacked up and sent when *sendPacket is true once again
+otherwise user actions will be constantly polled and simulated by server pyshics engine
+
+
+---- KNOWN ISSUES THAT WONT BE FIXED SOON ----
+Severe:
+    RageBot: silent aim will severely hinder aiming accuracy
