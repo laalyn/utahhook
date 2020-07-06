@@ -33,7 +33,7 @@ void FakeDuck::CreateMove(CUserCmd *cmd)
 			break;
 	}
 
-	CreateMove::sendPacket = false;
+	CreateMove::sendPacket = true;
 
 	static bool pSwitch = false;
 	static int counter = 0;
