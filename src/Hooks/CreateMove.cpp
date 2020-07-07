@@ -113,7 +113,7 @@ bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
 	}
 	else
 	{
-	    *sendPacket = CreateMove::sendPacket;
+	    *sendPacket = true; // force true
 	}
 
 	if (CreateMove::sendPacket) {
