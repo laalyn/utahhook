@@ -32,9 +32,6 @@
 #include "../Hacks/nofall.h"
 #include "../Hacks/ragdollgravity.h"
 
-bool CreateMove::sendPacket = true;
-QAngle CreateMove::lastTickViewAngles = QAngle(0, 0, 0);
-
 typedef bool (*CreateMoveFn) (void*, float, CUserCmd*);
 
 bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
@@ -47,31 +44,24 @@ bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
         uintptr_t rbp;
         asm volatile("mov %%rbp, %0" : "=r" (rbp));
         bool *sendPacket = ((*(bool **)rbp) - 0x18);
+
 	C_BasePlayer* localplayer = (C_BasePlayer*)entityList->GetClientEntity(engine->GetLocalPlayer());
-	static bool shutUp = false;
-	if (!localplayer || !localplayer->GetAlive()) {
+	static bool suppressDeadNotif = false;
+	if (!localplayer || !localplayer->GetAlive())
+	{
 	    *sendPacket = true;
-	    CreateMove::hideShot = false;
-	    if (!shutUp) cvar->ConsoleDPrintf("[CreateMove] sendPacket enabled, you are dead\n");
-	    shutUp = true;
+	    CreateMove::chokeStack = 0;
+	    CreateMove::sendPacket = false;
+	    // if (!suppressDeadNotif) cvar->ConsoleDPrintf("[CreateMove] sendPacket enabled, you are dead\n");
+	    suppressDeadNotif = true;
 	} else
 	{
-	    shutUp = false;
+	    // let it stack up, normal behavior
 	    *sendPacket = false;
+	    suppressDeadNotif = false;
 	}
 
-	static int ticksElapsed;
-	if (CreateMove::hideShot)
-	{
-	    ticksElapsed++;
-	    cvar->ConsoleDPrintf("[RageBot -> CreateMove] ticks passed since hideShot: %d\n", ticksElapsed);
-	    if (ticksElapsed == 1) // cant push it more than this much
-	    {
-		CreateMove::hideShot = false;
-		cvar->ConsoleDPrintf("[RageBot -> CreateMove] finished hiding shot {tick: %d}\n", CreateMove::tickCnt);
-	    }
-	}
-
+	// gets reset because it only chokes current packet
 	CreateMove::sendPacket = true;
 
 	/* run code that affects movement before prediction */
@@ -89,31 +79,48 @@ bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
 	NoFall::PrePredictionCreateMove(cmd);
 
 	PredictionSystem::StartPrediction(cmd);
-		if(Settings::Legitbot::enabled)
-			Legitbot::CreateMove(cmd);
-		else if( Settings::Ragebot::enabled)
-			Ragebot::CreateMove(cmd);
-		LagComp::CreateMove(cmd);
-		AutoKnife::CreateMove(cmd);
-		AntiAim::CreateMove(cmd);
-		FakeLag::CreateMove(cmd);
-		ESP::CreateMove(cmd);
-		TracerEffect::CreateMove(cmd);
-		RagdollGravity::CreateMove(cvar);
+	    if (Settings::Legitbot::enabled)
+		Legitbot::CreateMove(cmd);
+	    else if ( Settings::Ragebot::enabled)
+		Ragebot::CreateMove(cmd);
+	    LagComp::CreateMove(cmd);
+	    AutoKnife::CreateMove(cmd);
+	    AntiAim::CreateMove(cmd);
+	    FakeLag::CreateMove(cmd);
+	    ESP::CreateMove(cmd);
+	    TracerEffect::CreateMove(cmd);
+	    RagdollGravity::CreateMove(cvar);
 	PredictionSystem::EndPrediction();
 
     	EdgeJump::PostPredictionCreateMove(cmd);
     	NoFall::PostPredictionCreateMove(cmd);
 
-	if (CreateMove::hideShot)
+	static bool suppressNotChokingNotif = false;
+	// chocking
+	if (!CreateMove::sendPacket)
 	{
 	    *sendPacket = false;
-	    ticksElapsed = 0;
-	    cvar->ConsoleDPrintf("[RageBot -> CreateMove] hiding shot {tick: %d}\n", CreateMove::tickCnt);
+	    CreateMove::chokeStack++;
+	    // cvar->ConsoleDPrintf("[RageBot -> CreateMove] hiding shot {tick: %d}\n", CreateMove::tickCnt);
+	    cvar->ConsoleDPrintf("[CreateMove] choke meter: ");
+	    for (int i = 1; i <= CreateMove::chokeStack; i++) {
+		if (i > 15) {
+		    cvar->ConsoleDPrintf("[!!] ", i);
+		} else {
+		    cvar->ConsoleDPrintf("[%d] ", i);
+		}
+	    }
+	    cvar->ConsoleDPrintf("{tick: %d}\n", CreateMove::tickCnt);
+	    suppressNotChokingNotif = false;
 	}
+	// sending
 	else
 	{
-	    *sendPacket = true; // force true
+	    *sendPacket = true;
+	    CreateMove::chokeStack = 0;
+	    // cvar->ConsoleDPrintf("[CreateMove] sending <+> {tick: %d}\n", CreateMove::tickCnt);
+	    if (!suppressNotChokingNotif) cvar->ConsoleDPrintf("[CreateMove] choke meter: {tick: %d}\n", CreateMove::tickCnt);
+	    suppressNotChokingNotif = true;
 	}
 
 	if (CreateMove::sendPacket) {
@@ -124,8 +131,6 @@ bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
 	if (CreateMove::tickCnt > 1024) {
 	    CreateMove::tickCnt = 0;
 	}
-
-
     }
 
 	return false;

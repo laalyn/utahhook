@@ -33,24 +33,27 @@ void FakeDuck::CreateMove(CUserCmd *cmd)
 			break;
 	}
 
-	CreateMove::sendPacket = true;
-
+	bool choke = true;
 	static bool pSwitch = false;
-	static int counter = 0;
+	static int cnt = 0;
 
-	if (counter % 14 == 0)
+	if (cnt % 14 == 0)
 		pSwitch = true;
-	else if (counter % 14 == 6)
-		CreateMove::sendPacket = true;
-	else if (counter % 14 == 7)
+	else if (cnt % 14 == 6)
+		choke = false;
+	else if (cnt % 14 == 7)
 		pSwitch = false;
 
-	counter++;
+	cnt++;
 
 	if (pSwitch)
 		cmd->buttons |= IN_DUCK;
 	else
 		cmd->buttons &= ~IN_DUCK;
+
+	if (choke) {
+	    CreateMove::sendPacket = false;
+	}
 }
 
 void FakeDuck::OverrideView(CViewSetup *pSetup)

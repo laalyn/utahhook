@@ -56,10 +56,12 @@ namespace Hooks
 
 namespace CreateMove
 {
+	// potentially useful stats
 	inline int tickCnt = 0;
-	inline bool hideShot = false;
-	extern bool sendPacket;
-	extern QAngle lastTickViewAngles;
+	inline int chokeStack = 0;
+	// only affects current tick, then gets reset
+	inline bool sendPacket = true;
+	inline QAngle lastTickViewAngles = QAngle(0, 0, 0);
 }
 
 namespace OverrideView

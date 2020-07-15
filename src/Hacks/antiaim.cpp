@@ -276,12 +276,12 @@ void AntiAim::CreateMove(CUserCmd *cmd)
 	nextUpdate = globalVars->curtime + 1.1;
     }
 
-    if ((nextUpdate - globalVars->interval_per_tick) >= globalVars->curtime && nextUpdate <= globalVars->curtime)
-	CreateMove::sendPacket = false;
+    // if ((nextUpdate - globalVars->interval_per_tick) >= globalVars->curtime && nextUpdate <= globalVars->curtime)
+	// CreateMove::sendPacket = false;
 
     if (needToFlick)
     {
-	CreateMove::sendPacket = false;
+	// CreateMove::sendPacket = false;
 
 	if (Settings::AntiAim::LBYBreaker::enabled)
 	    angle.y += directionSwitch ? -Settings::AntiAim::LBYBreaker::offset : Settings::AntiAim::LBYBreaker::offset;

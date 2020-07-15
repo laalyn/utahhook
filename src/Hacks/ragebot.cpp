@@ -1612,7 +1612,7 @@ static void RagebotAutoShoot(C_BasePlayer* player, C_BaseCombatWeapon* activeWea
 	{
 	    // cvar->ConsoleDPrintf("[RageBot] Hiding shot {mastersend: %d}\n", CreateMove::masterSend);
 	    // cvar->ConsoleDPrintf("[RageBot] fired {tick: %d}\n", CreateMove::tickCnt);
-	    CreateMove::hideShot = true;
+	    CreateMove::sendPacket = false;
 	    cmd->buttons |= IN_ATTACK;
 	    return;
 	}

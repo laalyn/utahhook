@@ -9,8 +9,9 @@ int ticksMax = 16;
 
 void FakeLag::CreateMove(CUserCmd* cmd)
 {
-	if (!Settings::FakeLag::enabled)
-		return;
+
+    if (!Settings::FakeLag::enabled)
+	return;
 
 	C_BasePlayer* localplayer = (C_BasePlayer*) entityList->GetClientEntity(engine->GetLocalPlayer());
 	if (!localplayer || !localplayer->GetAlive())
@@ -21,13 +22,13 @@ void FakeLag::CreateMove(CUserCmd* cmd)
 
 	if (cmd->buttons & IN_ATTACK)
 	{
-		CreateMove::sendPacket = true;
+		// CreateMove::sendPacket = true;
 		return;
 	}
 
 	if (ticks >= ticksMax)
 	{
-		CreateMove::sendPacket = true;
+		// CreateMove::sendPacket = true;
 		ticks = 0;
 	}
 	else
@@ -49,9 +50,9 @@ void FakeLag::CreateMove(CUserCmd* cmd)
 			CreateMove::sendPacket = ticks < 16 - packetsToChoke;
 		}
 		else
-			CreateMove::sendPacket = ticks < 16 - Settings::FakeLag::value;
+		    CreateMove::sendPacket = ticks < 16 - Settings::FakeLag::value;
 	}
 
-	CreateMove::sendPacket = ticks < ticksMax - Settings::FakeLag::value;
+	// CreateMove::sendPacket = ticks < ticksMax - Settings::FakeLag::value;
 	ticks++;
 }
