@@ -32,6 +32,8 @@
 #include "../Hacks/nofall.h"
 #include "../Hacks/ragdollgravity.h"
 
+bool safeMode = false;
+
 typedef bool (*CreateMoveFn) (void*, float, CUserCmd*);
 
 bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
@@ -57,7 +59,7 @@ bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
 	} else
 	{
 	    // let it stack up, normal behavior
-	    *sendPacket = false;
+	    *sendPacket = safeMode == true ? true : false;
 	    suppressDeadNotif = false;
 	}
 
@@ -99,8 +101,8 @@ bool Hooks::CreateMove(void* thisptr, float flInputSampleTime, CUserCmd* cmd)
 	// chocking
 	if (!CreateMove::sendPacket)
 	{
-	    *sendPacket = false;
-	    CreateMove::chokeStack++;
+	    *sendPacket = safeMode == true ? true : false;
+        if (*sendPacket == false) CreateMove::chokeStack++;
 	    // cvar->ConsoleDPrintf("[RageBot -> CreateMove] hiding shot {tick: %d}\n", CreateMove::tickCnt);
 	    cvar->ConsoleDPrintf("[CreateMove] choke meter: ");
 	    for (int i = 1; i <= CreateMove::chokeStack; i++) {
